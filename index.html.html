@@ -1,0 +1,1775 @@
+<!DOCTYPE html>
+<html lang="da">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>OHMS LOV · Beregner</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Cambria&family=STIX+Two+Math&family=STIX+Two+Text:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#0a0e0c;
+    --bg-2:#0f1612;
+    --ink:#e6f1d9;
+    --ink-dim:#8aa088;
+    --amber:#ffb347;
+    --neon:#9bff5b;
+    --neon-dim:#4a7a32;
+    --line:#1d2a1f;
+    --line-2:#2a3d2d;
+    --red:#ff5c4d;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html,body{height:100%}
+  body{
+    font-family:'Inter', system-ui, sans-serif;
+    background:
+      radial-gradient(ellipse at 20% 0%, rgba(155,255,91,0.06), transparent 50%),
+      radial-gradient(ellipse at 90% 100%, rgba(255,179,71,0.05), transparent 50%),
+      var(--bg);
+    color:var(--ink);
+    min-height:100vh;
+    overflow-x:hidden;
+    position:relative;
+  }
+  /* Grain & scanlines */
+  body::before{
+    content:"";
+    position:fixed;inset:0;
+    background-image:
+      repeating-linear-gradient(0deg, rgba(155,255,91,0.025) 0 1px, transparent 1px 3px);
+    pointer-events:none;
+    z-index:1;
+    mix-blend-mode:overlay;
+  }
+  body::after{
+    content:"";
+    position:fixed;inset:0;
+    background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='160' height='160'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.9'/><feColorMatrix values='0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0.18 0'/></filter><rect width='100%25' height='100%25' filter='url(%23n)'/></svg>");
+    pointer-events:none;
+    opacity:.4;
+    z-index:2;
+    mix-blend-mode:overlay;
+  }
+
+  .wrap{
+    position:relative;
+    z-index:3;
+    max-width:1180px;
+    margin:0 auto;
+    padding:32px 24px 80px;
+  }
+
+  /* Top bar */
+  .topbar{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    border-bottom:1px solid var(--line-2);
+    padding-bottom:14px;
+    font-size:11px;
+    letter-spacing:0.18em;
+    text-transform:uppercase;
+    color:var(--ink-dim);
+  }
+  .topbar .dot{
+    display:inline-block;width:8px;height:8px;border-radius:50%;
+    background:var(--neon);
+    box-shadow:0 0 10px var(--neon);
+    margin-right:8px;
+    animation:pulse 2s ease-in-out infinite;
+  }
+  @keyframes pulse{50%{opacity:.4}}
+
+  /* Hero */
+  .hero{
+    margin-top:40px;
+    display:grid;
+    grid-template-columns:1.2fr .8fr;
+    gap:40px;
+    align-items:end;
+    padding-bottom:30px;
+    border-bottom:1px dashed var(--line-2);
+  }
+  .hero h1{
+    font-family:'STIX Two Text', Cambria, Georgia, serif;
+    font-size: clamp(44px, 8vw, 104px);
+    line-height:.95;
+    letter-spacing:-.02em;
+    color:var(--ink);
+    font-weight:600;
+  }
+  .hero h1 .accent{
+    color:var(--amber);
+    font-style:italic;
+    font-family:'STIX Two Text', Cambria, Georgia, serif;
+    font-weight:400;
+  }
+  .hero p{
+    font-family:'Inter', system-ui, sans-serif;
+    font-style:normal;
+    font-size:15px;
+    color:var(--ink-dim);
+    line-height:1.6;
+    max-width:380px;
+  }
+  .hero p .formula{
+    font-family:'STIX Two Math','STIX Two Text', Cambria, Georgia, serif;
+    font-style:normal;
+    color:var(--neon);
+    background:rgba(155,255,91,0.08);
+    padding:4px 10px;
+    border:1px solid var(--neon-dim);
+    display:inline-block;
+    margin-top:10px;
+    font-size:16px;
+    letter-spacing:0;
+  }
+  .hero p .formula .var{font-style:italic}
+
+  /* Calculator panel */
+  .panel{
+    margin-top:40px;
+    background:
+      linear-gradient(180deg, rgba(155,255,91,0.02), transparent 30%),
+      var(--bg-2);
+    border:1px solid var(--line-2);
+    position:relative;
+    overflow:hidden;
+  }
+  .panel::before{
+    content:"";
+    position:absolute;
+    top:0;left:0;right:0;height:1px;
+    background:linear-gradient(90deg,transparent,var(--neon),transparent);
+    opacity:.5;
+  }
+  .panel-head{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    padding:14px 24px;
+    border-bottom:1px solid var(--line);
+    font-size:11px;
+    letter-spacing:.2em;
+    text-transform:uppercase;
+    color:var(--ink-dim);
+  }
+  .panel-head .right{display:flex;gap:18px;align-items:center}
+  .ledbar{display:flex;gap:4px}
+  .ledbar span{
+    width:14px;height:4px;background:var(--line-2);
+  }
+  .ledbar span.on{background:var(--neon);box-shadow:0 0 6px var(--neon)}
+
+  .grid{
+    display:grid;
+    grid-template-columns:repeat(4,1fr);
+    gap:1px;
+    background:var(--line);
+  }
+  .cell{
+    background:var(--bg-2);
+    padding:28px 24px 22px;
+    display:flex;
+    flex-direction:column;
+    gap:14px;
+    position:relative;
+    transition:background .25s;
+  }
+  .cell:hover{background:#121a14}
+  .cell .label{
+    display:flex;
+    justify-content:space-between;
+    align-items:baseline;
+    font-size:10px;
+    letter-spacing:.25em;
+    text-transform:uppercase;
+    color:var(--ink-dim);
+  }
+  .cell .label .sym{
+    font-family:'STIX Two Text', Cambria, Georgia, serif;
+    font-style:italic;
+    font-size:20px;
+    color:var(--amber);
+    letter-spacing:0;
+  }
+  .cell .unit-name{
+    font-family:'STIX Two Text', Cambria, Georgia, serif;
+    font-style:italic;
+    font-size:15px;
+    color:var(--ink);
+    text-transform:none;
+    letter-spacing:0;
+  }
+  .input-row{
+    display:flex;
+    align-items:baseline;
+    gap:10px;
+    border-bottom:1px solid var(--line-2);
+    padding-bottom:8px;
+    transition:border-color .25s;
+  }
+  .cell:focus-within .input-row{border-color:var(--neon)}
+  .input-row input{
+    flex:1;
+    background:transparent;
+    border:none;
+    outline:none;
+    color:var(--ink);
+    font-family:'Inter', system-ui, sans-serif;
+    font-size:32px;
+    font-weight:500;
+    letter-spacing:-.01em;
+    width:100%;
+    min-width:0;
+  }
+  .input-row input::placeholder{color:#2f4233}
+  .input-row .unit{
+    font-family:'Inter', system-ui, sans-serif;
+    font-size:13px;
+    color:var(--neon);
+    letter-spacing:.15em;
+  }
+  /* Computed look */
+  .cell.computed .input-row{border-color:var(--amber);border-style:dashed}
+  .cell.computed input{color:var(--amber)}
+  .cell.computed .badge{
+    color:var(--amber);
+    border-color:var(--amber);
+  }
+  .cell .badge{
+    position:absolute;
+    top:10px;right:10px;
+    font-size:9px;
+    letter-spacing:.2em;
+    padding:2px 6px;
+    border:1px solid var(--neon-dim);
+    color:var(--neon);
+    background:rgba(155,255,91,0.05);
+    opacity:0;
+    transition:opacity .25s;
+  }
+  .cell.active .badge::before{content:"INPUT"}
+  .cell.computed .badge::before{content:"CALC"}
+  .cell.active .badge, .cell.computed .badge{opacity:1}
+
+  /* Controls */
+  .controls{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    padding:18px 24px;
+    border-top:1px solid var(--line);
+    flex-wrap:wrap;
+    gap:14px;
+  }
+  .status{
+    font-size:11px;
+    letter-spacing:.18em;
+    text-transform:uppercase;
+    color:var(--ink-dim);
+    display:flex;align-items:center;gap:10px;
+  }
+  .status .ok{color:var(--neon)}
+  .status .warn{color:var(--red)}
+  .actions{display:flex;gap:10px}
+  button{
+    background:transparent;
+    border:1px solid var(--line-2);
+    color:var(--ink);
+    padding:10px 18px;
+    font-family:'Inter', system-ui, sans-serif;
+    font-size:11px;
+    letter-spacing:.2em;
+    text-transform:uppercase;
+    cursor:pointer;
+    transition:all .2s;
+  }
+  button:hover{border-color:var(--neon);color:var(--neon);background:rgba(155,255,91,0.06)}
+  button.primary{
+    background:var(--neon);color:#08110a;border-color:var(--neon);
+  }
+  button.primary:hover{background:#b6ff7a;border-color:#b6ff7a;color:#08110a}
+
+  /* Formula reference */
+  .reference{
+    margin-top:60px;
+    display:grid;
+    grid-template-columns:repeat(4,1fr);
+    gap:24px;
+  }
+  .ref{
+    border:1px solid var(--line-2);
+    padding:22px 20px;
+    background:var(--bg-2);
+    position:relative;
+  }
+  .ref .n{
+    position:absolute;top:14px;right:16px;
+    font-family:'STIX Two Text', Cambria, Georgia, serif;font-style:italic;
+    color:var(--neon-dim);font-size:14px;
+  }
+  .ref h3{
+    font-family:'Inter', system-ui, sans-serif;
+    font-size:13px;
+    color:var(--amber);
+    margin-bottom:14px;
+    letter-spacing:.15em;
+    text-transform:uppercase;
+    font-weight:600;
+  }
+  .ref .eq{
+    font-family:'STIX Two Math','STIX Two Text', Cambria, Georgia, serif;
+    font-size:22px;
+    color:var(--ink);
+    padding:12px 0;
+    border-top:1px dashed var(--line-2);
+    border-bottom:1px dashed var(--line-2);
+    margin-bottom:12px;
+  }
+  .ref .eq .var{font-style:italic}
+  .ref .eq .op{color:var(--neon);font-style:normal}
+  .ref p{
+    font-family:'Inter', system-ui, sans-serif;
+    font-style:normal;
+    font-size:13px;
+    color:var(--ink-dim);
+    line-height:1.5;
+  }
+
+  /* Ohms wheel */
+  .wheel-section{
+    margin-top:80px;
+  }
+  .wheel-wrap{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:40px;
+    align-items:center;
+  }
+  .wheel-svg{
+    width:100%;
+    max-width:520px;
+    margin:0 auto;
+    display:block;
+    filter:drop-shadow(0 0 30px rgba(155,255,91,0.08));
+  }
+  .wheel-svg .seg{
+    fill:var(--bg-2);
+    stroke:var(--line-2);
+    stroke-width:1.5;
+    transition:fill .3s, stroke .3s, filter .3s;
+  }
+  .wheel-svg .seg.lit{
+    fill:rgba(155,255,91,0.18);
+    stroke:var(--neon);
+    stroke-width:2;
+    filter:drop-shadow(0 0 12px rgba(155,255,91,0.6));
+  }
+  @keyframes wheelPulse{
+    50%{fill:rgba(155,255,91,0.28);filter:drop-shadow(0 0 20px rgba(155,255,91,0.85));}
+  }
+  .wheel-svg .quad{
+    fill:none;
+    stroke:var(--line-2);
+    stroke-width:1;
+    stroke-dasharray:2 3;
+  }
+  .wheel-svg .quad-label{
+    font-family:'STIX Two Math','STIX Two Text', Cambria, Georgia, serif;
+    font-size:32px;
+    font-style:italic;
+    fill:var(--amber);
+    text-anchor:middle;
+    dominant-baseline:central;
+  }
+  .wheel-svg .quad-name{
+    font-family:'Inter', system-ui, sans-serif;
+    font-size:9px;
+    font-weight:600;
+    fill:var(--ink-dim);
+    letter-spacing:.2em;
+    text-anchor:middle;
+  }
+  .wheel-svg .formula-text{
+    font-family:'STIX Two Math','STIX Two Text', Cambria, Georgia, serif;
+    font-size:13px;
+    fill:var(--ink);
+    text-anchor:middle;
+    dominant-baseline:central;
+    pointer-events:none;
+  }
+  .wheel-svg .formula-text.lit{
+    fill:var(--neon);
+    font-weight:600;
+  }
+  .wheel-svg .center-circle{
+    fill:var(--bg);
+    stroke:var(--neon-dim);
+    stroke-width:1.5;
+  }
+  .wheel-svg .center-text{
+    font-family:'Inter', system-ui, sans-serif;
+    font-size:10px;
+    font-weight:600;
+    fill:var(--neon);
+    text-anchor:middle;
+    dominant-baseline:central;
+    letter-spacing:.2em;
+  }
+  .wheel-svg .center-text-sub{
+    font-family:'STIX Two Text', Cambria, Georgia, serif;
+    font-style:italic;
+    font-size:11px;
+    fill:var(--ink-dim);
+    text-anchor:middle;
+    dominant-baseline:central;
+  }
+  .wheel-info h3{
+    font-family:'STIX Two Text', Cambria, Georgia, serif;
+    font-size:clamp(28px,4vw,44px);
+    line-height:1.05;
+    color:var(--ink);
+    margin-bottom:18px;
+    font-weight:600;
+  }
+  .wheel-info h3 .accent{
+    color:var(--amber);
+    font-style:italic;
+    font-weight:400;
+  }
+  .wheel-info p{
+    font-family:'Inter', system-ui, sans-serif;
+    font-size:14px;
+    color:var(--ink-dim);
+    line-height:1.6;
+    margin-bottom:14px;
+  }
+  .wheel-info .legend{
+    display:grid;
+    grid-template-columns:repeat(2,1fr);
+    gap:10px;
+    margin-top:20px;
+    padding-top:20px;
+    border-top:1px dashed var(--line-2);
+  }
+  .wheel-info .legend-item{
+    display:flex;
+    align-items:baseline;
+    gap:10px;
+    font-family:'Inter', system-ui, sans-serif;
+    font-size:13px;
+    color:var(--ink);
+  }
+  .wheel-info .legend-item .sym{
+    font-family:'STIX Two Math','STIX Two Text', Cambria, Georgia, serif;
+    font-style:italic;
+    font-size:20px;
+    color:var(--amber);
+    width:24px;
+    text-align:center;
+  }
+  .wheel-info .legend-item .unit{
+    color:var(--ink-dim);
+    margin-left:auto;
+    font-size:11px;
+    letter-spacing:.15em;
+  }
+  .wheel-info .active-indicator{
+    margin-top:18px;
+    padding:12px 14px;
+    border:1px solid var(--line-2);
+    background:rgba(155,255,91,0.04);
+    font-family:'Inter', system-ui, sans-serif;
+    font-size:11px;
+    letter-spacing:.15em;
+    text-transform:uppercase;
+    color:var(--ink-dim);
+    display:flex;
+    align-items:center;
+    gap:10px;
+    transition:all .3s;
+  }
+  .wheel-info .active-indicator.active{
+    border-color:var(--neon);
+    background:rgba(155,255,91,0.08);
+    color:var(--neon);
+  }
+  .wheel-info .active-indicator .dot{
+    width:8px;height:8px;border-radius:50%;
+    background:var(--line-2);
+    transition:all .3s;
+  }
+  .wheel-info .active-indicator.active .dot{
+    background:var(--neon);
+    box-shadow:0 0 10px var(--neon);
+  }
+  @media (max-width:820px){
+    .wheel-wrap{grid-template-columns:1fr;gap:20px}
+    .wheel-info{order:-1}
+  }
+
+  /* Cable section */
+  .cable-section{
+    margin-top:80px;
+  }
+  .section-head{
+    display:flex;
+    justify-content:space-between;
+    align-items:end;
+    padding-bottom:18px;
+    border-bottom:1px dashed var(--line-2);
+    margin-bottom:30px;
+    gap:30px;
+    flex-wrap:wrap;
+  }
+  .section-head h2{
+    font-family:'STIX Two Text', Cambria, Georgia, serif;
+    font-size:clamp(32px,5vw,56px);
+    line-height:1;
+    letter-spacing:-.01em;
+    font-weight:600;
+  }
+  .section-head h2 .accent{
+    color:var(--amber);
+    font-family:'STIX Two Text', Cambria, Georgia, serif;
+    font-style:italic;
+    font-weight:400;
+  }
+  .section-head .desc{
+    font-family:'Inter', system-ui, sans-serif;
+    font-style:normal;
+    color:var(--ink-dim);
+    font-size:14px;
+    max-width:380px;
+    line-height:1.6;
+  }
+
+  .cable-grid{
+    display:grid;
+    grid-template-columns:1.1fr 1fr;
+    gap:1px;
+    background:var(--line);
+    border:1px solid var(--line-2);
+  }
+  .cable-inputs{
+    background:var(--bg-2);
+    padding:0;
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:1px;
+    background:var(--line);
+  }
+  .cable-output{
+    background:
+      linear-gradient(180deg, rgba(255,179,71,0.04), transparent 40%),
+      var(--bg-2);
+    padding:30px;
+    display:flex;
+    flex-direction:column;
+    gap:18px;
+    position:relative;
+  }
+  .cable-output::before{
+    content:"OUTPUT";
+    position:absolute;
+    top:14px;right:18px;
+    font-size:9px;
+    letter-spacing:.25em;
+    color:var(--amber);
+    border:1px solid var(--amber);
+    padding:2px 6px;
+    opacity:.7;
+  }
+  .out-row{
+    display:flex;
+    justify-content:space-between;
+    align-items:baseline;
+    padding-bottom:12px;
+    border-bottom:1px dashed var(--line-2);
+  }
+  .out-row:last-of-type{border-bottom:none}
+  .out-row .out-label{
+    display:flex;
+    flex-direction:column;
+    gap:2px;
+  }
+  .out-row .out-label .k{
+    font-size:10px;
+    letter-spacing:.25em;
+    text-transform:uppercase;
+    color:var(--ink-dim);
+  }
+  .out-row .out-label .n{
+    font-family:'STIX Two Text', Cambria, Georgia, serif;
+    font-style:italic;
+    font-size:14px;
+    color:var(--ink);
+  }
+  .out-row .out-val{
+    text-align:right;
+  }
+  .out-row .out-val .v{
+    font-family:'Inter', system-ui, sans-serif;
+    font-size:30px;
+    font-weight:600;
+    color:var(--amber);
+    display:block;
+    line-height:1;
+    letter-spacing:-.01em;
+  }
+  .out-row .out-val .u{
+    font-size:10px;
+    letter-spacing:.2em;
+    color:var(--neon);
+    margin-top:4px;
+    display:inline-block;
+  }
+  .verdict{
+    margin-top:auto;
+    padding:14px 16px;
+    border:1px solid var(--line-2);
+    background:rgba(155,255,91,0.04);
+    font-size:11px;
+    letter-spacing:.15em;
+    text-transform:uppercase;
+    color:var(--neon);
+    display:flex;
+    align-items:center;
+    gap:10px;
+  }
+  .verdict.warn{
+    color:var(--red);
+    background:rgba(255,92,77,0.06);
+    border-color:rgba(255,92,77,0.3);
+  }
+  .verdict.amber{
+    color:var(--amber);
+    background:rgba(255,179,71,0.05);
+    border-color:rgba(255,179,71,0.3);
+  }
+  .verdict .ico{
+    width:8px;height:8px;border-radius:50%;
+    background:currentColor;
+    box-shadow:0 0 8px currentColor;
+  }
+
+  /* Expandable explanation */
+  .out-row{
+    cursor:pointer;
+    user-select:none;
+    transition:background .2s;
+    margin:0 -30px;
+    padding:0 30px 12px;
+  }
+  .out-row:hover{
+    background:rgba(155,255,91,0.03);
+  }
+  .out-row .chev{
+    display:inline-block;
+    color:var(--neon);
+    font-size:10px;
+    margin-left:6px;
+    transition:transform .25s;
+    opacity:.5;
+  }
+  .out-row.open .chev{
+    transform:rotate(90deg);
+    opacity:1;
+  }
+  .explain{
+    max-height:0;
+    overflow:hidden;
+    transition:max-height .35s ease, padding .25s ease, margin .25s ease;
+    margin:0 -30px;
+    padding:0 30px;
+    background:rgba(0,0,0,0.25);
+    border-left:2px solid var(--amber);
+  }
+  .explain.open{
+    max-height:800px;
+    padding:18px 30px 20px;
+    margin-top:-6px;
+    margin-bottom:8px;
+  }
+  .explain h4{
+    font-size:10px;
+    letter-spacing:.25em;
+    text-transform:uppercase;
+    color:var(--ink-dim);
+    margin-bottom:8px;
+    font-weight:400;
+  }
+  .explain .formula-block{
+    font-family:'STIX Two Math','STIX Two Text', Cambria, Georgia, serif;
+    font-size:22px;
+    color:var(--amber);
+    padding:14px 18px;
+    line-height:1.6;
+    background:rgba(255,179,71,0.05);
+    border:1px dashed rgba(255,179,71,0.3);
+    margin-bottom:14px;
+    display:flex;
+    align-items:center;
+    flex-wrap:wrap;
+    gap:8px;
+  }
+  .explain .formula-block .var{
+    font-style:italic;
+    color:var(--amber);
+  }
+  .explain .formula-block .op,
+  .explain .formula-block .eq{
+    color:var(--neon);
+    font-style:normal;
+    margin:0 4px;
+  }
+  .explain .formula-block sub{
+    font-size:.7em;
+    font-style:normal;
+    vertical-align:-.25em;
+    margin-left:1px;
+  }
+  /* Word-style fraction */
+  .frac{
+    display:inline-flex;
+    flex-direction:column;
+    align-items:center;
+    vertical-align:middle;
+    margin:0 4px;
+    font-size:.9em;
+    line-height:1.1;
+  }
+  .frac .num-top{
+    padding:0 8px 2px;
+    border-bottom:1.5px solid var(--amber);
+  }
+  .frac .num-bot{
+    padding:2px 8px 0;
+  }
+  .explain .step{
+    font-family:'Inter', system-ui, sans-serif;
+    font-size:14px;
+    color:var(--ink);
+    line-height:1.9;
+    padding:6px 0;
+    border-top:1px dashed var(--line);
+  }
+  .explain .step:first-of-type{border-top:none}
+  .explain .step .var{
+    font-family:'STIX Two Text', Cambria, Georgia, serif;
+    font-style:italic;
+    color:var(--neon);
+    font-weight:600;
+    font-size:16px;
+  }
+  .explain .step .num{color:var(--amber);font-weight:600}
+  .explain .note{
+    font-family:'Inter', system-ui, sans-serif;
+    font-style:normal;
+    color:var(--ink-dim);
+    font-size:13px;
+    line-height:1.6;
+    margin-top:12px;
+    padding-top:12px;
+    border-top:1px dashed var(--line);
+  }
+  .explain .result-line{
+    font-family:'STIX Two Math','STIX Two Text', Cambria, Georgia, serif;
+    font-size:18px;
+    color:var(--neon);
+    padding:12px 0 4px;
+    margin-top:10px;
+    border-top:1px solid var(--neon-dim);
+  }
+  .explain .result-line .var{font-style:italic}
+  .explain .result-line .num{color:var(--amber);font-weight:600}
+
+  .cable-cell{
+    background:var(--bg-2);
+    padding:24px 22px;
+    display:flex;
+    flex-direction:column;
+    gap:12px;
+  }
+  .cable-cell .label{
+    display:flex;
+    justify-content:space-between;
+    align-items:baseline;
+    font-size:10px;
+    letter-spacing:.25em;
+    text-transform:uppercase;
+    color:var(--ink-dim);
+  }
+  .cable-cell .unit-name{
+    font-family:'STIX Two Text', Cambria, Georgia, serif;
+    font-style:italic;
+    font-size:14px;
+    color:var(--ink);
+  }
+  .cable-cell .input-row input{
+    font-size:24px;
+  }
+  .cable-cell select{
+    background:transparent;
+    border:none;
+    border-bottom:1px solid var(--line-2);
+    color:var(--ink);
+    font-family:'STIX Two Text', Cambria, Georgia, serif;
+    font-size:22px;
+    padding-bottom:8px;
+    outline:none;
+    cursor:pointer;
+    appearance:none;
+    background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'><path d='M1 1l5 5 5-5' stroke='%239bff5b' stroke-width='1.5' fill='none'/></svg>");
+    background-repeat:no-repeat;
+    background-position:right 4px center;
+    padding-right:24px;
+  }
+  .cable-cell select:focus{border-color:var(--neon)}
+  .cable-cell select option{background:var(--bg-2);color:var(--ink)}
+
+  @media (max-width: 820px){
+    .cable-grid{grid-template-columns:1fr}
+    .cable-inputs{grid-template-columns:1fr 1fr}
+  }
+  @media (max-width: 480px){
+    .cable-inputs{grid-template-columns:1fr}
+  }
+
+  /* Footer */
+  .footer{
+    margin-top:60px;
+    padding-top:20px;
+    border-top:1px solid var(--line-2);
+    display:flex;justify-content:space-between;
+    font-size:10px;letter-spacing:.25em;text-transform:uppercase;
+    color:var(--ink-dim);
+  }
+  .footer .sig{font-family:'STIX Two Text', Cambria, Georgia, serif;font-style:italic;text-transform:none;letter-spacing:0;color:var(--neon-dim)}
+
+  /* Tick marks decoration */
+  .ticks{
+    display:flex;justify-content:space-between;
+    padding:0 24px;height:14px;align-items:center;
+    border-bottom:1px solid var(--line);
+  }
+  .ticks span{
+    width:1px;height:6px;background:var(--line-2);
+  }
+  .ticks span:nth-child(5n+1){height:10px;background:var(--neon-dim)}
+
+  /* Responsive */
+  @media (max-width: 820px){
+    .hero{grid-template-columns:1fr;gap:20px}
+    .grid{grid-template-columns:repeat(2,1fr)}
+    .reference{grid-template-columns:repeat(2,1fr)}
+  }
+  @media (max-width: 480px){
+    .grid{grid-template-columns:1fr}
+    .reference{grid-template-columns:1fr}
+    .input-row input{font-size:24px}
+  }
+
+  /* Reveal animations */
+  .reveal{opacity:0;transform:translateY(12px);animation:rise .7s ease forwards}
+  @keyframes rise{to{opacity:1;transform:none}}
+  .d1{animation-delay:.05s}.d2{animation-delay:.15s}.d3{animation-delay:.25s}
+  .d4{animation-delay:.35s}.d5{animation-delay:.45s}
+</style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="topbar reveal d1">
+      <div></div>
+      <div>EL/01 — Ohms Lov</div>
+    </div>
+
+    <header class="hero">
+      <h1 class="reveal d2">Ohms<br><span class="accent">lov</span>·beregner</h1>
+      <p class="reveal d3">
+        Indtast to vilkårlige værdier — de resterende beregnes automatisk ud fra forholdet mellem spænding, strøm, modstand og effekt.
+        <span class="formula"><span class="var">V</span> = <span class="var">I</span> × <span class="var">R</span> &nbsp;&nbsp; <span class="var">P</span> = <span class="var">V</span> × <span class="var">I</span></span>
+      </p>
+    </header>
+
+    <section class="panel reveal d4" aria-label="Beregner">
+      <div class="panel-head">
+        <div>↳ Beregnings·modul</div>
+        <div class="right">
+          <span>Signal</span>
+          <div class="ledbar" id="ledbar">
+            <span></span><span></span><span></span><span></span><span></span>
+          </div>
+        </div>
+      </div>
+
+      <div class="ticks" aria-hidden="true">
+        <!-- 20 small ticks -->
+        <span></span><span></span><span></span><span></span><span></span>
+        <span></span><span></span><span></span><span></span><span></span>
+        <span></span><span></span><span></span><span></span><span></span>
+        <span></span><span></span><span></span><span></span><span></span>
+      </div>
+
+      <div class="grid">
+        <div class="cell" data-key="V">
+          <div class="badge"></div>
+          <div class="label">
+            <span>01 · Spænding</span>
+            <span class="sym">V</span>
+          </div>
+          <div class="unit-name">Volt</div>
+          <div class="input-row">
+            <input type="text" inputmode="decimal" id="V" placeholder="0,00" autocomplete="off"/>
+            <span class="unit">V</span>
+          </div>
+        </div>
+
+        <div class="cell" data-key="I">
+          <div class="badge"></div>
+          <div class="label">
+            <span>02 · Strøm</span>
+            <span class="sym">I</span>
+          </div>
+          <div class="unit-name">Ampere</div>
+          <div class="input-row">
+            <input type="text" inputmode="decimal" id="I" placeholder="0,00" autocomplete="off"/>
+            <span class="unit">A</span>
+          </div>
+        </div>
+
+        <div class="cell" data-key="R">
+          <div class="badge"></div>
+          <div class="label">
+            <span>03 · Modstand</span>
+            <span class="sym">R</span>
+          </div>
+          <div class="unit-name">Ohm</div>
+          <div class="input-row">
+            <input type="text" inputmode="decimal" id="R" placeholder="0,00" autocomplete="off"/>
+            <span class="unit">Ω</span>
+          </div>
+        </div>
+
+        <div class="cell" data-key="P">
+          <div class="badge"></div>
+          <div class="label">
+            <span>04 · Effekt</span>
+            <span class="sym">P</span>
+          </div>
+          <div class="unit-name">Watt</div>
+          <div class="input-row">
+            <input type="text" inputmode="decimal" id="P" placeholder="0,00" autocomplete="off"/>
+            <span class="unit">W</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="controls">
+        <div class="status" id="status">
+          <span>Status:</span><span class="ok" id="statusText">Afventer · indtast 2 værdier</span>
+        </div>
+        <div class="actions">
+          <button id="clear">Ryd alt</button>
+          <button class="primary" id="example">Indsæt eksempel</button>
+        </div>
+      </div>
+    </section>
+
+    <section class="reference reveal d5">
+      <div class="ref">
+        <span class="n">01</span>
+        <h3>Spænding</h3>
+        <div class="eq"><span class="var">V</span> <span class="op">=</span> <span class="var">I</span> × <span class="var">R</span></div>
+        <p>Spænding er trykket der driver elektronerne. Måles i volt.</p>
+      </div>
+      <div class="ref">
+        <span class="n">02</span>
+        <h3>Strøm</h3>
+        <div class="eq"><span class="var">I</span> <span class="op">=</span> <span class="var">V</span> ÷ <span class="var">R</span></div>
+        <p>Strøm er mængden af elektroner pr. sekund. Måles i ampere.</p>
+      </div>
+      <div class="ref">
+        <span class="n">03</span>
+        <h3>Modstand</h3>
+        <div class="eq"><span class="var">R</span> <span class="op">=</span> <span class="var">V</span> ÷ <span class="var">I</span></div>
+        <p>Modstand bremser strømmen og afgiver varme. Måles i ohm.</p>
+      </div>
+      <div class="ref">
+        <span class="n">04</span>
+        <h3>Effekt</h3>
+        <div class="eq"><span class="var">P</span> <span class="op">=</span> <span class="var">V</span> × <span class="var">I</span></div>
+        <p>Effekt er energien pr. sekund i kredsløbet. Måles i watt.</p>
+      </div>
+    </section>
+
+    <section class="wheel-section reveal d5" aria-label="Ohms hjul">
+      <div class="section-head">
+        <h2>Ohms<br><span class="accent">hjul</span></h2>
+        <p class="desc">
+          Alle 12 kombinationer af Ohms lov og effektformlen. Hver kvadrant viser hvad du beregner — V, I, R eller P — og de tre måder at gøre det på. Når du regner ovenover, lyser den anvendte formel op her.
+        </p>
+      </div>
+
+      <div class="wheel-wrap">
+        <div>
+          <svg class="wheel-svg" viewBox="0 0 500 500" xmlns="http://www.w3.org/2000/svg">
+            <!-- Outer ring background -->
+            <circle cx="250" cy="250" r="240" fill="none" stroke="var(--line-2)" stroke-width="1"/>
+            <circle cx="250" cy="250" r="170" fill="none" stroke="var(--line-2)" stroke-width="1"/>
+
+            <!-- 12 segments: 4 quadrants × 3 formulas each -->
+            <!-- Each segment is a pie slice between r=85 and r=240 -->
+            <!-- Quadrant order (clockwise from top): V (top), I (right), R (bottom), P (left) -->
+            <!-- Each quadrant spans 90deg, divided into 3 segments of 30deg each -->
+
+            <!-- Segments are generated below. The path uses:
+                 M = inner-start, L = outer-start, A = arc to outer-end, L = inner-end, A = arc back -->
+
+            <!-- QUADRANT V (top): angles -90 to 0 deg, i.e. from -90 to 0 -->
+            <!-- We use SVG coords: 0deg = right, -90 = top -->
+            <!-- V segments: V=I·R, V=√(P·R), V=P/I -->
+            <path class="seg" data-formula="V_IR"     d=""/>
+            <path class="seg" data-formula="V_PR"     d=""/>
+            <path class="seg" data-formula="V_PI"     d=""/>
+            <!-- I segments: I=V/R, I=P/V, I=√(P/R) -->
+            <path class="seg" data-formula="I_VR"     d=""/>
+            <path class="seg" data-formula="I_PV"     d=""/>
+            <path class="seg" data-formula="I_PR"     d=""/>
+            <!-- R segments: R=V/I, R=V²/P, R=P/I² -->
+            <path class="seg" data-formula="R_VI"     d=""/>
+            <path class="seg" data-formula="R_VP"     d=""/>
+            <path class="seg" data-formula="R_PI"     d=""/>
+            <!-- P segments: P=V·I, P=I²·R, P=V²/R -->
+            <path class="seg" data-formula="P_VI"     d=""/>
+            <path class="seg" data-formula="P_IR"     d=""/>
+            <path class="seg" data-formula="P_VR"     d=""/>
+
+            <!-- Formula text labels (positioned at midpoint of each segment) -->
+            <!-- These are placed after paths so they render on top -->
+            <g id="wheelLabels"></g>
+
+            <!-- Quadrant separators (lines from center outward) -->
+            <line class="quad" x1="250" y1="10"  x2="250" y2="490"/>
+            <line class="quad" x1="10"  y1="250" x2="490" y2="250"/>
+
+            <!-- Inner quadrant labels (the big V, I, R, P) -->
+            <!-- Positioned at radius ~130 -->
+            <text class="quad-label" x="250" y="135">V</text>
+            <text class="quad-name"  x="250" y="105">VOLT</text>
+            <text class="quad-label" x="365" y="250">I</text>
+            <text class="quad-name"  x="395" y="250">AMPERE</text>
+            <text class="quad-label" x="250" y="365">R</text>
+            <text class="quad-name"  x="250" y="395">OHM</text>
+            <text class="quad-label" x="135" y="250">P</text>
+            <text class="quad-name"  x="105" y="250">WATT</text>
+
+            <!-- Center circle -->
+            <circle class="center-circle" cx="250" cy="250" r="58"/>
+            <text class="center-text" x="250" y="240">OHMS</text>
+            <text class="center-text-sub" x="250" y="262">lov · hjul</text>
+          </svg>
+        </div>
+
+        <div class="wheel-info">
+          <h3>Find <span class="accent">formlen</span> du har brug for</h3>
+          <p>Vælg den størrelse du vil beregne (V, I, R eller P) i den indre ring. Den ydre ring viser hvilke to størrelser du skal kende — og hvilken formel der binder dem sammen.</p>
+          <div class="legend">
+            <div class="legend-item"><span class="sym">V</span><span>Spænding</span><span class="unit">VOLT</span></div>
+            <div class="legend-item"><span class="sym">I</span><span>Strøm</span><span class="unit">AMP</span></div>
+            <div class="legend-item"><span class="sym">R</span><span>Modstand</span><span class="unit">OHM</span></div>
+            <div class="legend-item"><span class="sym">P</span><span>Effekt</span><span class="unit">WATT</span></div>
+          </div>
+          <div class="active-indicator" id="wheelIndicator">
+            <span class="dot"></span>
+            <span id="wheelIndicatorText">Beregn ovenover for at se aktiv formel</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="cable-section reveal d5" aria-label="Kabel beregner">
+      <div class="section-head">
+        <h2>Kabel·tab<br><span class="accent">og·længde</span></h2>
+        <p class="desc">
+          Beregn spændingsfald og effekttab i en leder. Lange kabler og tynde tværsnit giver mærkbare tab — særligt ved høj strøm og lav spænding.
+        </p>
+      </div>
+
+      <div class="cable-grid">
+        <div class="cable-inputs">
+          <div class="cable-cell">
+            <div class="label">
+              <span>A · Materiale</span>
+              <span style="font-family:'STIX Two Text', Cambria, Georgia, serif;font-style:italic;color:var(--amber);font-size:18px">ρ</span>
+            </div>
+            <div class="unit-name">Leder·materiale</div>
+            <select id="material">
+              <option value="0.01724">Kobber (Cu)</option>
+              <option value="0.02826">Aluminium (Al)</option>
+              <option value="0.0240">Guld (Au)</option>
+              <option value="0.0159">Sølv (Ag)</option>
+            </select>
+          </div>
+
+          <div class="cable-cell">
+            <div class="label">
+              <span>B · System</span>
+              <span style="font-family:'STIX Two Text', Cambria, Georgia, serif;font-style:italic;color:var(--amber);font-size:18px">⌁</span>
+            </div>
+            <div class="unit-name">Kabel·system</div>
+            <select id="system">
+              <option value="2">DC / 1-faset (tur+retur)</option>
+              <option value="1.732">3-faset (√3)</option>
+              <option value="1">Enkel leder (kun envejs)</option>
+            </select>
+          </div>
+
+          <div class="cable-cell">
+            <div class="label">
+              <span>C · Længde</span>
+              <span style="font-family:'STIX Two Text', Cambria, Georgia, serif;font-style:italic;color:var(--amber);font-size:18px">L</span>
+            </div>
+            <div class="unit-name">Kabel·længde</div>
+            <div class="input-row">
+              <input type="text" inputmode="decimal" id="cableLength" placeholder="10" autocomplete="off"/>
+              <span class="unit">M</span>
+            </div>
+          </div>
+
+          <div class="cable-cell">
+            <div class="label">
+              <span>D · Tværsnit</span>
+              <span style="font-family:'STIX Two Text', Cambria, Georgia, serif;font-style:italic;color:var(--amber);font-size:18px">A</span>
+            </div>
+            <div class="unit-name">Leder·areal</div>
+            <div class="input-row">
+              <input type="text" inputmode="decimal" id="cableArea" placeholder="2,5" autocomplete="off"/>
+              <span class="unit">MM²</span>
+            </div>
+          </div>
+
+          <div class="cable-cell">
+            <div class="label">
+              <span>E · Strøm</span>
+              <span style="font-family:'STIX Two Text', Cambria, Georgia, serif;font-style:italic;color:var(--amber);font-size:18px">I</span>
+            </div>
+            <div class="unit-name">Belastning</div>
+            <div class="input-row">
+              <input type="text" inputmode="decimal" id="cableI" placeholder="10" autocomplete="off"/>
+              <span class="unit">A</span>
+            </div>
+          </div>
+
+          <div class="cable-cell">
+            <div class="label">
+              <span>F · Kilde·spænding</span>
+              <span style="font-family:'STIX Two Text', Cambria, Georgia, serif;font-style:italic;color:var(--amber);font-size:18px">V</span>
+            </div>
+            <div class="unit-name">Forsyning</div>
+            <div class="input-row">
+              <input type="text" inputmode="decimal" id="cableV" placeholder="230" autocomplete="off"/>
+              <span class="unit">V</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="cable-output">
+          <div class="out-row" data-out="R">
+            <div class="out-label">
+              <span class="k">01 · Modstand <span class="chev">▶</span></span>
+              <span class="n">Total kabel·modstand</span>
+            </div>
+            <div class="out-val">
+              <span class="v" id="outR">—</span>
+              <span class="u">OHM (Ω)</span>
+            </div>
+          </div>
+          <div class="explain" id="explainR"></div>
+
+          <div class="out-row" data-out="Vdrop">
+            <div class="out-label">
+              <span class="k">02 · Spændingsfald <span class="chev">▶</span></span>
+              <span class="n">Tab over kablet</span>
+            </div>
+            <div class="out-val">
+              <span class="v" id="outVdrop">—</span>
+              <span class="u">VOLT (V)</span>
+            </div>
+          </div>
+          <div class="explain" id="explainVdrop"></div>
+
+          <div class="out-row" data-out="Pct">
+            <div class="out-label">
+              <span class="k">03 · Procent <span class="chev">▶</span></span>
+              <span class="n">Fald ift. kilde</span>
+            </div>
+            <div class="out-val">
+              <span class="v" id="outPct">—</span>
+              <span class="u">PROCENT (%)</span>
+            </div>
+          </div>
+          <div class="explain" id="explainPct"></div>
+
+          <div class="out-row" data-out="Ploss">
+            <div class="out-label">
+              <span class="k">04 · Effekttab <span class="chev">▶</span></span>
+              <span class="n">Varme i lederen</span>
+            </div>
+            <div class="out-val">
+              <span class="v" id="outPloss">—</span>
+              <span class="u">WATT (W)</span>
+            </div>
+          </div>
+          <div class="explain" id="explainPloss"></div>
+
+          <div class="out-row" data-out="Vload">
+            <div class="out-label">
+              <span class="k">05 · Spænding ved last <span class="chev">▶</span></span>
+              <span class="n">Det forbruger får</span>
+            </div>
+            <div class="out-val">
+              <span class="v" id="outVload">—</span>
+              <span class="u">VOLT (V)</span>
+            </div>
+          </div>
+          <div class="explain" id="explainVload"></div>
+
+          <div class="verdict" id="verdict">
+            <span class="ico"></span>
+            <span id="verdictText">Indtast værdier for at se vurdering</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+
+      <span>EL/01 · Ohms lov · 1827</span>
+      <span class="sig">Bygget med strøm og lidt modstand.</span>
+    </div>
+  </div>
+
+<script>
+(() => {
+  const fields = ['V','I','R','P'];
+  const inputs = {};
+  fields.forEach(f => inputs[f] = document.getElementById(f));
+  const statusText = document.getElementById('statusText');
+  const ledbar = document.getElementById('ledbar').querySelectorAll('span');
+
+  // ===== OHMS WHEEL SETUP =====
+  // Build pie segment paths and labels for the 12 formulas.
+  // Quadrant centers (clockwise from top): V at 270deg (top), I at 0deg (right),
+  // R at 90deg (bottom), P at 180deg (left). Each quadrant spans 90deg, divided into 3.
+  const cx = 250, cy = 250, rInner = 165, rOuter = 240;
+  // Segment data: quadrant, position within quadrant (0..2), formula key, display HTML
+  // Each segment is 30deg wide. Quadrants centered on their cardinal direction.
+  // We arrange formulas so each quadrant has 3 segments (left, middle, right) covering 90deg.
+  const segments = [
+    // V quadrant (top), center at 270deg, spans 225-315
+    {key:'V_PI', startDeg:225, endDeg:255, label:'P / I',     unknown:'V', knowns:['P','I']},
+    {key:'V_IR', startDeg:255, endDeg:285, label:'I × R',     unknown:'V', knowns:['I','R']},
+    {key:'V_PR', startDeg:285, endDeg:315, label:'√(P×R)',    unknown:'V', knowns:['P','R']},
+    // I quadrant (right), center at 0deg/360, spans 315-45
+    {key:'I_PV', startDeg:315, endDeg:345, label:'P / V',     unknown:'I', knowns:['P','V']},
+    {key:'I_VR', startDeg:345, endDeg:375, label:'V / R',     unknown:'I', knowns:['V','R']},
+    {key:'I_PR', startDeg:375, endDeg:405, label:'√(P/R)',    unknown:'I', knowns:['P','R']},
+    // R quadrant (bottom), center at 90deg, spans 45-135
+    {key:'R_PI', startDeg:45,  endDeg:75,  label:'P / I²',    unknown:'R', knowns:['P','I']},
+    {key:'R_VI', startDeg:75,  endDeg:105, label:'V / I',     unknown:'R', knowns:['V','I']},
+    {key:'R_VP', startDeg:105, endDeg:135, label:'V² / P',    unknown:'R', knowns:['V','P']},
+    // P quadrant (left), center at 180deg, spans 135-225
+    {key:'P_VR', startDeg:135, endDeg:165, label:'V² / R',    unknown:'P', knowns:['V','R']},
+    {key:'P_VI', startDeg:165, endDeg:195, label:'V × I',     unknown:'P', knowns:['V','I']},
+    {key:'P_IR', startDeg:195, endDeg:225, label:'I² × R',    unknown:'P', knowns:['I','R']},
+  ];
+
+  const polar = (deg, r) => {
+    const rad = (deg - 90) * Math.PI / 180; // -90 so 0deg points up... but we want 0=right
+    // Actually use standard math: 0deg = right (3 o'clock), increasing clockwise in SVG (y is down)
+    const rad2 = deg * Math.PI / 180;
+    return { x: cx + r * Math.cos(rad2), y: cy + r * Math.sin(rad2) };
+  };
+
+  const segPath = (startDeg, endDeg) => {
+    // Normalize: SVG arcs use 0deg = right, going clockwise (since y is down)
+    const a = startDeg % 360, b = endDeg % 360;
+    const p1 = polar(startDeg, rOuter);
+    const p2 = polar(endDeg,   rOuter);
+    const p3 = polar(endDeg,   rInner);
+    const p4 = polar(startDeg, rInner);
+    const largeArc = (endDeg - startDeg) > 180 ? 1 : 0;
+    return `M ${p1.x.toFixed(2)} ${p1.y.toFixed(2)}
+            A ${rOuter} ${rOuter} 0 ${largeArc} 1 ${p2.x.toFixed(2)} ${p2.y.toFixed(2)}
+            L ${p3.x.toFixed(2)} ${p3.y.toFixed(2)}
+            A ${rInner} ${rInner} 0 ${largeArc} 0 ${p4.x.toFixed(2)} ${p4.y.toFixed(2)}
+            Z`;
+  };
+
+  // Apply paths and create labels
+  const labelGroup = document.getElementById('wheelLabels');
+  segments.forEach(s => {
+    const path = document.querySelector(`.seg[data-formula="${s.key}"]`);
+    if (path) path.setAttribute('d', segPath(s.startDeg, s.endDeg));
+    // Label at midpoint of segment arc
+    const midDeg = (s.startDeg + s.endDeg) / 2;
+    const labelR = (rInner + rOuter) / 2;
+    const p = polar(midDeg, labelR);
+    const t = document.createElementNS('http://www.w3.org/2000/svg','text');
+    t.setAttribute('class','formula-text');
+    t.setAttribute('x', p.x.toFixed(2));
+    t.setAttribute('y', p.y.toFixed(2));
+    t.setAttribute('data-formula', s.key);
+    t.innerHTML = s.label;
+    labelGroup.appendChild(t);
+  });
+
+  const wheelIndicator = document.getElementById('wheelIndicator');
+  const wheelIndicatorText = document.getElementById('wheelIndicatorText');
+
+  const lightWheel = (formulaKey, descriptionText) => {
+    // Clear previous
+    document.querySelectorAll('.wheel-svg .seg').forEach(el => el.classList.remove('lit'));
+    document.querySelectorAll('.wheel-svg .formula-text').forEach(el => el.classList.remove('lit'));
+    if (!formulaKey){
+      wheelIndicator.classList.remove('active');
+      wheelIndicatorText.textContent = 'Beregn ovenover for at se aktiv formel';
+      return;
+    }
+    const seg = document.querySelector(`.seg[data-formula="${formulaKey}"]`);
+    const txt = document.querySelector(`.formula-text[data-formula="${formulaKey}"]`);
+    if (seg) seg.classList.add('lit');
+    if (txt) txt.classList.add('lit');
+    wheelIndicator.classList.add('active');
+    wheelIndicatorText.textContent = descriptionText;
+  };
+
+  // Map known-pair → formula key for the main Ohms calculator
+  // Keys are sets of 2 known values; we pick the "unknown" the user is focused on,
+  // but for simplicity we light the formula that produces the FIRST unknown alphabetically,
+  // or better: light all formulas where the knowns match. Simplest: pick canonical formula per pair.
+  // Map: known pair (sorted) → primary formula key (for the most relevant unknown)
+  // When both V&I known: derive R and P. Show R=V/I (most common).
+  // When V&R known: derive I and P. Show I=V/R.
+  // When V&P known: derive I and R. Show I=P/V.
+  // When I&R known: derive V and P. Show V=I·R.
+  // When I&P known: derive V and R. Show V=P/I.
+  // When R&P known: derive V and I. Show I=√(P/R).
+  const knownPairToFormulas = {
+    'I,V': ['R_VI','P_VI'],
+    'R,V': ['I_VR','P_VR'],
+    'P,V': ['I_PV','R_VP'],
+    'I,R': ['V_IR','P_IR'],
+    'I,P': ['V_PI','R_PI'],
+    'P,R': ['V_PR','I_PR'],
+  };
+
+  const lightWheelMulti = (formulaKeys, descriptionText) => {
+    document.querySelectorAll('.wheel-svg .seg').forEach(el => el.classList.remove('lit'));
+    document.querySelectorAll('.wheel-svg .formula-text').forEach(el => el.classList.remove('lit'));
+    if (!formulaKeys || formulaKeys.length === 0){
+      wheelIndicator.classList.remove('active');
+      wheelIndicatorText.textContent = 'Beregn ovenover for at se aktiv formel';
+      return;
+    }
+    formulaKeys.forEach(k => {
+      const seg = document.querySelector(`.seg[data-formula="${k}"]`);
+      const txt = document.querySelector(`.formula-text[data-formula="${k}"]`);
+      if (seg) seg.classList.add('lit');
+      if (txt) txt.classList.add('lit');
+    });
+    wheelIndicator.classList.add('active');
+    wheelIndicatorText.textContent = descriptionText;
+  };
+
+  // Parse Danish number (comma decimal) or dot decimal
+  const parse = (s) => {
+    if (s == null) return NaN;
+    s = String(s).trim().replace(/\s/g,'').replace(',', '.');
+    if (s === '') return NaN;
+    const n = parseFloat(s);
+    return isFinite(n) ? n : NaN;
+  };
+
+  const fmt = (n) => {
+    if (!isFinite(n)) return '';
+    // Reasonable rounding
+    let abs = Math.abs(n);
+    let decimals = 2;
+    if (abs >= 1000) decimals = 1;
+    if (abs >= 10000) decimals = 0;
+    if (abs > 0 && abs < 1) decimals = 4;
+    if (abs > 0 && abs < 0.01) decimals = 6;
+    let str = n.toFixed(decimals);
+    // Trim trailing zeros
+    str = str.replace(/(\.\d*?)0+$/,'$1').replace(/\.$/,'');
+    return str.replace('.', ',');
+  };
+
+  // Track which fields are user-entered
+  const userEntered = new Set();
+
+  const clearComputed = () => {
+    fields.forEach(f => {
+      const cell = inputs[f].closest('.cell');
+      cell.classList.remove('computed','active');
+      if (!userEntered.has(f)) inputs[f].value = '';
+    });
+    userEntered.forEach(f => {
+      inputs[f].closest('.cell').classList.add('active');
+    });
+  };
+
+  const setLEDs = (n) => {
+    ledbar.forEach((el,i) => el.classList.toggle('on', i < n));
+  };
+
+  const setStatus = (msg, type='ok') => {
+    statusText.className = type;
+    statusText.textContent = msg;
+  };
+
+  const compute = () => {
+    // Read user-entered values
+    const vals = {};
+    userEntered.forEach(f => {
+      const n = parse(inputs[f].value);
+      if (!isNaN(n)) vals[f] = n;
+    });
+
+    const keys = Object.keys(vals);
+    setLEDs(keys.length);
+
+    clearComputed();
+
+    if (keys.length < 2){
+      setStatus(keys.length === 0 ? 'Afventer · indtast 2 værdier' : 'Indtast 1 værdi mere', 'ok');
+      lightWheelMulti(null);
+      return;
+    }
+    if (keys.length > 2){
+      setStatus('For mange værdier — ryd én', 'warn');
+      lightWheelMulti(null);
+      return;
+    }
+
+    // Validate non-negative; allow zero where it makes sense but warn on impossible combos
+    for (const k of keys){
+      if (vals[k] < 0){
+        setStatus('Negative værdier ikke tilladt', 'warn');
+        lightWheelMulti(null);
+        return;
+      }
+    }
+
+    let V = vals.V, I = vals.I, R = vals.R, P = vals.P;
+    const has = (k) => k in vals;
+    try {
+      // 6 combinations
+      if (has('V') && has('I')){
+        R = V === 0 && I === 0 ? NaN : (I === 0 ? Infinity : V / I);
+        P = V * I;
+      } else if (has('V') && has('R')){
+        if (R === 0){ setStatus('R = 0 giver uendelig strøm', 'warn'); return; }
+        I = V / R;
+        P = V * I;
+      } else if (has('V') && has('P')){
+        if (V === 0){ setStatus('V = 0 ⇒ I/R kan ikke bestemmes', 'warn'); return; }
+        I = P / V;
+        R = V / I;
+      } else if (has('I') && has('R')){
+        V = I * R;
+        P = V * I;
+      } else if (has('I') && has('P')){
+        if (I === 0){ setStatus('I = 0 ⇒ V/R kan ikke bestemmes', 'warn'); return; }
+        V = P / I;
+        R = V / I;
+      } else if (has('R') && has('P')){
+        if (R === 0){ setStatus('R = 0 giver uendelige værdier', 'warn'); return; }
+        I = Math.sqrt(P / R);
+        V = I * R;
+      }
+    } catch(e){
+      setStatus('Beregningsfejl', 'warn');
+      return;
+    }
+
+    const results = {V, I, R, P};
+    fields.forEach(f => {
+      if (!userEntered.has(f)){
+        inputs[f].value = fmt(results[f]);
+        inputs[f].closest('.cell').classList.add('computed');
+      }
+    });
+
+    // Light the wheel - find which formulas correspond to the known pair
+    const sortedKeys = [...keys].sort().join(',');
+    const formulasToLight = knownPairToFormulas[sortedKeys];
+    if (formulasToLight){
+      const computedFields = fields.filter(f => !userEntered.has(f));
+      const descParts = formulasToLight.map(fk => {
+        const unknown = fk.split('_')[0];
+        const seg = segments.find(s => s.key === fk);
+        return seg ? `${unknown} = ${seg.label}` : '';
+      }).filter(Boolean);
+      lightWheelMulti(formulasToLight, 'Aktiv · ' + descParts.join('  ·  '));
+    }
+
+    setStatus('Beregnet · OK', 'ok');
+  };
+
+  fields.forEach(f => {
+    inputs[f].addEventListener('input', () => {
+      const val = inputs[f].value.trim();
+      if (val === ''){
+        userEntered.delete(f);
+      } else {
+        userEntered.add(f);
+        // Cap at 2 user-entered: if a third is typed, remove the oldest
+        if (userEntered.size > 2){
+          const arr = [...userEntered];
+          // remove the first that isn't this one
+          const toRemove = arr.find(x => x !== f);
+          if (toRemove){
+            userEntered.delete(toRemove);
+            inputs[toRemove].value = '';
+          }
+        }
+      }
+      compute();
+    });
+    inputs[f].addEventListener('focus', () => {
+      inputs[f].closest('.cell').style.outline = 'none';
+    });
+  });
+
+  document.getElementById('clear').addEventListener('click', () => {
+    userEntered.clear();
+    fields.forEach(f => inputs[f].value = '');
+    clearComputed();
+    setLEDs(0);
+    setStatus('Nulstillet · indtast 2 værdier', 'ok');
+    lightWheelMulti(null);
+    inputs.V.focus();
+  });
+
+  document.getElementById('example').addEventListener('click', () => {
+    userEntered.clear();
+    fields.forEach(f => inputs[f].value = '');
+    inputs.V.value = '12';
+    inputs.R.value = '4';
+    userEntered.add('V');
+    userEntered.add('R');
+    compute();
+  });
+
+  // ===== CABLE CALCULATOR =====
+  const cableInputs = {
+    material: document.getElementById('material'),
+    system: document.getElementById('system'),
+    length: document.getElementById('cableLength'),
+    area: document.getElementById('cableArea'),
+    I: document.getElementById('cableI'),
+    V: document.getElementById('cableV'),
+  };
+  const outR = document.getElementById('outR');
+  const outVdrop = document.getElementById('outVdrop');
+  const outPct = document.getElementById('outPct');
+  const outPloss = document.getElementById('outPloss');
+  const outVload = document.getElementById('outVload');
+  const verdict = document.getElementById('verdict');
+  const verdictText = document.getElementById('verdictText');
+
+  const computeCable = () => {
+    const rho = parseFloat(cableInputs.material.value); // Ω·mm²/m
+    const matName = cableInputs.material.options[cableInputs.material.selectedIndex].text;
+    const factor = parseFloat(cableInputs.system.value);
+    const sysName = cableInputs.system.options[cableInputs.system.selectedIndex].text;
+    const L = parse(cableInputs.length.value);
+    const A = parse(cableInputs.area.value);
+    const I = parse(cableInputs.I.value);
+    const V = parse(cableInputs.V.value);
+
+    // Need L, A, I as minimum
+    if (isNaN(L) || isNaN(A) || isNaN(I) || L <= 0 || A <= 0){
+      outR.textContent = '—';
+      outVdrop.textContent = '—';
+      outPct.textContent = '—';
+      outPloss.textContent = '—';
+      outVload.textContent = '—';
+      verdict.className = 'verdict';
+      verdictText.textContent = 'Indtast længde, tværsnit og strøm';
+      // Clear explanations
+      ['R','Vdrop','Pct','Ploss','Vload'].forEach(k => {
+        document.getElementById('explain'+k).innerHTML =
+          '<p class="note">Indtast længde, tværsnit og strøm for at se beregningen.</p>';
+      });
+      return;
+    }
+
+    // Resistance per single conductor
+    const Rsingle = rho * L / A;
+    // Total loop resistance depends on system
+    const Rtotal = factor === 1 ? Rsingle : (factor === 2 ? 2 * Rsingle : Rsingle);
+
+    // Voltage drop
+    let Vdrop;
+    if (factor === 1.732){
+      Vdrop = 1.732 * I * Rsingle;
+    } else if (factor === 2){
+      Vdrop = 2 * I * Rsingle;
+    } else {
+      Vdrop = I * Rsingle;
+    }
+
+    // Power loss = I² · R_total (total resistance the current flows through)
+    const Ploss = I * I * Rtotal;
+
+    outR.textContent = fmt(Rtotal);
+    outVdrop.textContent = fmt(Vdrop);
+    outPloss.textContent = fmt(Ploss);
+
+    let pct = NaN, Vload = NaN;
+    if (!isNaN(V) && V > 0){
+      pct = (Vdrop / V) * 100;
+      Vload = V - Vdrop;
+      outPct.textContent = fmt(pct);
+      outVload.textContent = fmt(Vload);
+
+      if (Vload < 0){
+        verdict.className = 'verdict warn';
+        verdictText.textContent = 'Kritisk · spændingsfald større end kilden';
+      } else if (pct > 5){
+        verdict.className = 'verdict warn';
+        verdictText.textContent = 'For højt fald · over 5 % · øg tværsnit';
+      } else if (pct > 3){
+        verdict.className = 'verdict amber';
+        verdictText.textContent = 'Acceptabelt · men over 3 % grænse for lys';
+      } else {
+        verdict.className = 'verdict';
+        verdictText.textContent = 'OK · spændingsfald inden for normer';
+      }
+    } else {
+      outPct.textContent = '—';
+      outVload.textContent = '—';
+      verdict.className = 'verdict';
+      verdictText.textContent = 'Tilføj kilde·spænding for fuld vurdering';
+    }
+
+    // === Build explanations ===
+    // Helper: Word-style fraction
+    const frac = (top, bot) => `<span class="frac"><span class="num-top">${top}</span><span class="num-bot">${bot}</span></span>`;
+    // Helper: italic variable
+    const v = (txt) => `<span class="var">${txt}</span>`;
+
+    const rhoStr = fmt(rho);
+    const matShort = matName.split(' ')[0].toLowerCase();
+
+    // 01 · Modstand
+    let rExplain = '<h4>Formel</h4>';
+    if (factor === 2){
+      rExplain += `<div class="formula-block">${v('R')}<sub>total</sub> <span class="eq">=</span> 2 ${frac(v('ρ')+' × '+v('L'), v('A'))}</div>`;
+    } else {
+      rExplain += `<div class="formula-block">${v('R')} <span class="eq">=</span> ${frac(v('ρ')+' × '+v('L'), v('A'))}</div>`;
+    }
+    rExplain += '<h4>Indsat</h4>';
+    rExplain += `<div class="step">${v('ρ')} (resistivitet for ${matShort}) = <span class="num">${rhoStr}</span> Ω·mm²/m</div>`;
+    rExplain += `<div class="step">${v('L')} (kabellængde) = <span class="num">${fmt(L)}</span> m</div>`;
+    rExplain += `<div class="step">${v('A')} (tværsnit) = <span class="num">${fmt(A)}</span> mm²</div>`;
+    if (factor === 2){
+      rExplain += `<div class="step">${v('R')}<sub>én leder</sub> = ${frac('<span class="num">'+rhoStr+'</span> × <span class="num">'+fmt(L)+'</span>', '<span class="num">'+fmt(A)+'</span>')} = <span class="num">${fmt(Rsingle)}</span> Ω</div>`;
+      rExplain += `<div class="result-line">${v('R')}<sub>total</sub> = 2 × <span class="num">${fmt(Rsingle)}</span> = <span class="num">${fmt(Rtotal)}</span> Ω</div>`;
+      rExplain += '<p class="note">Strømmen løber både frem og tilbage gennem kablet, så modstanden ganges med 2.</p>';
+    } else if (factor === 1.732){
+      rExplain += `<div class="result-line">${v('R')}<sub>pr. leder</sub> = ${frac('<span class="num">'+rhoStr+'</span> × <span class="num">'+fmt(L)+'</span>', '<span class="num">'+fmt(A)+'</span>')} = <span class="num">${fmt(Rsingle)}</span> Ω</div>`;
+      rExplain += '<p class="note">Ved 3-faset regnes der pr. leder. Spændingsfaldet bruger faktoren √3.</p>';
+    } else {
+      rExplain += `<div class="result-line">${v('R')} = ${frac('<span class="num">'+rhoStr+'</span> × <span class="num">'+fmt(L)+'</span>', '<span class="num">'+fmt(A)+'</span>')} = <span class="num">${fmt(Rtotal)}</span> Ω</div>`;
+    }
+    document.getElementById('explainR').innerHTML = rExplain;
+
+    // 02 · Spændingsfald
+    let vdExplain = '<h4>Formel</h4>';
+    if (factor === 2){
+      vdExplain += `<div class="formula-block">${v('U')}<sub>fald</sub> <span class="eq">=</span> 2 × ${v('I')} × ${v('R')}<sub>leder</sub></div>`;
+    } else if (factor === 1.732){
+      vdExplain += `<div class="formula-block">${v('U')}<sub>fald</sub> <span class="eq">=</span> √3 × ${v('I')} × ${v('R')}<sub>leder</sub></div>`;
+    } else {
+      vdExplain += `<div class="formula-block">${v('U')}<sub>fald</sub> <span class="eq">=</span> ${v('I')} × ${v('R')}</div>`;
+    }
+    vdExplain += '<h4>Indsat</h4>';
+    vdExplain += `<div class="step">${v('I')} (strøm) = <span class="num">${fmt(I)}</span> A</div>`;
+    vdExplain += `<div class="step">${v('R')}<sub>leder</sub> (én leder) = <span class="num">${fmt(Rsingle)}</span> Ω</div>`;
+    if (factor === 2){
+      vdExplain += `<div class="result-line">${v('U')}<sub>fald</sub> = 2 × <span class="num">${fmt(I)}</span> × <span class="num">${fmt(Rsingle)}</span> = <span class="num">${fmt(Vdrop)}</span> V</div>`;
+      vdExplain += '<p class="note">Ohms lov anvendt på den samlede sløjfemodstand. Faktor 2, fordi strømmen passerer både frem- og returleder.</p>';
+    } else if (factor === 1.732){
+      vdExplain += `<div class="result-line">${v('U')}<sub>fald</sub> = 1,732 × <span class="num">${fmt(I)}</span> × <span class="num">${fmt(Rsingle)}</span> = <span class="num">${fmt(Vdrop)}</span> V</div>`;
+      vdExplain += '<p class="note">3-faset spændingsfald mellem faserne bruger √3 ≈ 1,732 som forholdet mellem fase- og linjespænding.</p>';
+    } else {
+      vdExplain += `<div class="result-line">${v('U')}<sub>fald</sub> = <span class="num">${fmt(I)}</span> × <span class="num">${fmt(Rsingle)}</span> = <span class="num">${fmt(Vdrop)}</span> V</div>`;
+      vdExplain += '<p class="note">Ren Ohms lov: spænding lig med strøm gange modstand.</p>';
+    }
+    document.getElementById('explainVdrop').innerHTML = vdExplain;
+
+    // 03 · Procent
+    let pctExplain = '<h4>Formel</h4>';
+    pctExplain += `<div class="formula-block">Fald % <span class="eq">=</span> ${frac(v('U')+'<sub>fald</sub>', v('U')+'<sub>kilde</sub>')} × 100</div>`;
+    if (!isNaN(V) && V > 0){
+      pctExplain += '<h4>Indsat</h4>';
+      pctExplain += `<div class="step">${v('U')}<sub>fald</sub> = <span class="num">${fmt(Vdrop)}</span> V</div>`;
+      pctExplain += `<div class="step">${v('U')}<sub>kilde</sub> = <span class="num">${fmt(V)}</span> V</div>`;
+      pctExplain += `<div class="result-line">Fald % = ${frac('<span class="num">'+fmt(Vdrop)+'</span>', '<span class="num">'+fmt(V)+'</span>')} × 100 = <span class="num">${fmt(pct)}</span> %</div>`;
+      pctExplain += '<p class="note">Tommelfingerregel: under 3 % er fint for belysning, under 5 % accepteres typisk for kraft og motorer.</p>';
+    } else {
+      pctExplain += '<p class="note">Indtast kilde-spænding for at beregne procent.</p>';
+    }
+    document.getElementById('explainPct').innerHTML = pctExplain;
+
+    // 04 · Effekttab
+    let plExplain = '<h4>Formel</h4>';
+    plExplain += `<div class="formula-block">${v('P')}<sub>tab</sub> <span class="eq">=</span> ${v('I')}<sup>2</sup> × ${v('R')}<sub>total</sub></div>`;
+    plExplain += '<h4>Indsat</h4>';
+    plExplain += `<div class="step">${v('I')} = <span class="num">${fmt(I)}</span> A &nbsp;⟹&nbsp; ${v('I')}<sup>2</sup> = <span class="num">${fmt(I*I)}</span> A²</div>`;
+    plExplain += `<div class="step">${v('R')}<sub>total</sub> = <span class="num">${fmt(Rtotal)}</span> Ω</div>`;
+    plExplain += `<div class="result-line">${v('P')}<sub>tab</sub> = <span class="num">${fmt(I*I)}</span> × <span class="num">${fmt(Rtotal)}</span> = <span class="num">${fmt(Ploss)}</span> W</div>`;
+    plExplain += '<p class="note">Denne effekt forsvinder som varme i kablet. Derfor bliver kabler lune når de er belastede — og brandfarlige hvis de er underdimensionerede.</p>';
+    document.getElementById('explainPloss').innerHTML = plExplain;
+
+    // 05 · Spænding ved last
+    let vlExplain = '<h4>Formel</h4>';
+    vlExplain += `<div class="formula-block">${v('U')}<sub>last</sub> <span class="eq">=</span> ${v('U')}<sub>kilde</sub> − ${v('U')}<sub>fald</sub></div>`;
+    if (!isNaN(V) && V > 0){
+      vlExplain += '<h4>Indsat</h4>';
+      vlExplain += `<div class="step">${v('U')}<sub>kilde</sub> = <span class="num">${fmt(V)}</span> V</div>`;
+      vlExplain += `<div class="step">${v('U')}<sub>fald</sub> = <span class="num">${fmt(Vdrop)}</span> V</div>`;
+      vlExplain += `<div class="result-line">${v('U')}<sub>last</sub> = <span class="num">${fmt(V)}</span> − <span class="num">${fmt(Vdrop)}</span> = <span class="num">${fmt(Vload)}</span> V</div>`;
+      vlExplain += '<p class="note">Det er den spænding, der reelt når frem til forbrugeren. Motorer og elektronik, der får for lav spænding, kører dårligt eller går i stykker.</p>';
+    } else {
+      vlExplain += '<p class="note">Indtast kilde-spænding for at beregne lastspændingen.</p>';
+    }
+    document.getElementById('explainVload').innerHTML = vlExplain;
+  };
+
+  Object.values(cableInputs).forEach(el => {
+    el.addEventListener('input', computeCable);
+    el.addEventListener('change', computeCable);
+  });
+
+  // Click handlers for expanding explanations
+  document.querySelectorAll('.out-row[data-out]').forEach(row => {
+    row.addEventListener('click', () => {
+      const key = row.getAttribute('data-out');
+      const explain = document.getElementById('explain'+key);
+      const isOpen = row.classList.contains('open');
+      row.classList.toggle('open');
+      explain.classList.toggle('open');
+    });
+  });
+})();
+</script>
+</body>
+</html>
