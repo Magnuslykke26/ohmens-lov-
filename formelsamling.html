@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="da">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Formel Samling</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Cambria&family=STIX+Two+Math&family=STIX+Two+Text:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#0a0e0c;
+    --bg-2:#0f1612;
+    --ink:#e6f1d9;
+    --ink-dim:#8aa088;
+    --amber:#ffb347;
+    --neon:#9bff5b;
+    --neon-dim:#4a7a32;
+    --line:#1d2a1f;
+    --line-2:#2a3d2d;
+    --red:#ff5c4d;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html,body{height:100%}
+  body{
+    font-family:'Inter', system-ui, sans-serif;
+    background:
+      radial-gradient(ellipse at 20% 0%, rgba(155,255,91,0.06), transparent 50%),
+      radial-gradient(ellipse at 90% 100%, rgba(255,179,71,0.05), transparent 50%),
+      var(--bg);
+    color:var(--ink);
+    min-height:100vh;
+    overflow-x:hidden;
+    position:relative;
+  }
+  body::before{
+    content:"";
+    position:fixed;inset:0;
+    background-image:
+      repeating-linear-gradient(0deg, rgba(155,255,91,0.025) 0 1px, transparent 1px 3px);
+    pointer-events:none;
+    z-index:1;
+    mix-blend-mode:overlay;
+  }
+  body::after{
+    content:"";
+    position:fixed;inset:0;
+    background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='160' height='160'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.9'/><feColorMatrix values='0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0.18 0'/></filter><rect width='100%25' height='100%25' filter='url(%23n)'/></svg>");
+    pointer-events:none;
+    opacity:.4;
+    z-index:2;
+    mix-blend-mode:overlay;
+  }
+
+  .wrap{
+    position:relative;
+    z-index:3;
+    max-width:1180px;
+    margin:0 auto;
+    padding:32px 24px 80px;
+  }
+
+  /* Nav bar */
+  .navbar{
+    position:sticky;
+    top:0;
+    z-index:100;
+    background:rgba(10,14,12,0.92);
+    backdrop-filter:blur(8px);
+    border-bottom:1px solid var(--line-2);
+    display:flex;
+    align-items:center;
+    gap:0;
+    padding:0 24px;
+    margin:0 -24px 32px;
+  }
+  .navbar a{
+    display:inline-block;
+    font-family:'Inter', system-ui, sans-serif;
+    font-size:11px;
+    letter-spacing:.2em;
+    text-transform:uppercase;
+    color:var(--ink-dim);
+    text-decoration:none;
+    padding:14px 18px;
+    border-bottom:2px solid transparent;
+    transition:color .2s, border-color .2s;
+  }
+  .navbar a:hover{color:var(--ink)}
+  .navbar a.active{
+    color:var(--neon);
+    border-bottom-color:var(--neon);
+  }
+
+  /* Top bar */
+  .topbar{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    border-bottom:1px solid var(--line-2);
+    padding-bottom:14px;
+    font-size:11px;
+    letter-spacing:0.18em;
+    text-transform:uppercase;
+    color:var(--ink-dim);
+  }
+  .topbar .dot{
+    display:inline-block;width:8px;height:8px;border-radius:50%;
+    background:var(--neon);
+    box-shadow:0 0 10px var(--neon);
+    margin-right:8px;
+    animation:pulse 2s ease-in-out infinite;
+  }
+  @keyframes pulse{50%{opacity:.4}}
+
+  /* Hero */
+  .hero{
+    margin-top:40px;
+    display:grid;
+    grid-template-columns:1.2fr .8fr;
+    gap:40px;
+    align-items:end;
+    padding-bottom:30px;
+    border-bottom:1px dashed var(--line-2);
+  }
+  .hero h1{
+    font-family:'STIX Two Text', Cambria, Georgia, serif;
+    font-size: clamp(44px, 8vw, 104px);
+    line-height:.95;
+    letter-spacing:-.02em;
+    color:var(--ink);
+    font-weight:600;
+  }
+  .hero h1 .accent{
+    color:var(--amber);
+    font-style:italic;
+    font-family:'STIX Two Text', Cambria, Georgia, serif;
+    font-weight:400;
+  }
+  .hero p{
+    font-family:'Inter', system-ui, sans-serif;
+    font-style:normal;
+    font-size:15px;
+    color:var(--ink-dim);
+    line-height:1.6;
+    max-width:380px;
+  }
+
+  /* Footer */
+  .footer{
+    margin-top:60px;
+    padding-top:20px;
+    border-top:1px solid var(--line-2);
+    display:flex;justify-content:space-between;
+    font-size:10px;letter-spacing:.25em;text-transform:uppercase;
+    color:var(--ink-dim);
+  }
+  .footer .sig{font-family:'STIX Two Text', Cambria, Georgia, serif;font-style:italic;text-transform:none;letter-spacing:0;color:var(--neon-dim)}
+
+  /* Reveal animations */
+  .reveal{opacity:0;transform:translateY(12px);animation:rise .7s ease forwards}
+  @keyframes rise{to{opacity:1;transform:none}}
+  .d1{animation-delay:.05s}.d2{animation-delay:.15s}.d3{animation-delay:.25s}
+
+  @media (max-width: 820px){
+    .hero{grid-template-columns:1fr;gap:20px}
+  }
+</style>
+</head>
+<body>
+  <div class="wrap">
+    <nav class="navbar">
+      <a href="index.html">Ohms lov</a>
+      <a href="formelsamling.html" class="active">Formel samling</a>
+    </nav>
+
+    <div class="topbar reveal d1">
+      <div></div>
+      <div>EL/02 — Formel Samling</div>
+    </div>
+
+    <header class="hero">
+      <h1 class="reveal d2">Formel<br><span class="accent">samling</span></h1>
+      <p class="reveal d3">
+        En oversigt over de vigtigste elektriske formler — samlet på ét sted til hurtig reference.
+      </p>
+    </header>
+
+    <div class="footer reveal d3">
+      <span>EL/02 · Formel Samling</span>
+      <span class="sig">Bygget med strøm og lidt modstand.</span>
+    </div>
+  </div>
+</body>
+</html>
