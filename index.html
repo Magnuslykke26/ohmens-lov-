@@ -837,6 +837,14 @@
     color:var(--ink-dim);
     margin-top:2px;
   }
+  .cable-cell .awg-info{
+    font-size:11px;
+    letter-spacing:.08em;
+    color:var(--neon);
+    min-height:16px;
+    transition:opacity .2s;
+  }
+  .cable-cell .awg-info:empty{opacity:0}
 
   @media (max-width: 820px){
     .cable-grid{grid-template-columns:1fr}
@@ -1190,6 +1198,7 @@
               <option value="0.081">AWG 28 · 0,081 mm²</option>
               <option value="0.0509">AWG 30 · 0,051 mm²</option>
             </select>
+            <div class="awg-info" id="awgInfo"></div>
           </div>
 
           <div class="cable-cell">
@@ -1801,14 +1810,20 @@
 
   // AWG → mm² konverter
   const awgSelect = document.getElementById('awgSelect');
+  const awgInfo = document.getElementById('awgInfo');
   awgSelect.addEventListener('change', () => {
     if (awgSelect.value) {
       cableInputs.area.value = awgSelect.value.replace('.', ',');
+      const label = awgSelect.options[awgSelect.selectedIndex].text.split(' · ')[0];
+      awgInfo.textContent = label + ' svarer til ' + awgSelect.value.replace('.', ',') + ' mm²';
       computeCable();
+    } else {
+      awgInfo.textContent = '';
     }
   });
   cableInputs.area.addEventListener('input', () => {
     awgSelect.value = '';
+    awgInfo.textContent = '';
   });
 
   // Click handlers for expanding explanations
