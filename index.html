@@ -1344,9 +1344,9 @@
         </div>
 
         <div class="cable-output">
-          <div class="out-row" style="cursor:default">
+          <div class="out-row" data-out="tpS">
             <div class="out-label">
-              <span class="k">01 · Tilsyneladende Effekt</span>
+              <span class="k">01 · Tilsyneladende Effekt <span class="chev">▶</span></span>
               <span class="n">S = √3 × V<sub>L</sub> × I<sub>L</sub></span>
             </div>
             <div class="out-val">
@@ -1354,10 +1354,11 @@
               <span class="u">kVA</span>
             </div>
           </div>
+          <div class="explain" id="explaintpS"></div>
 
-          <div class="out-row" style="cursor:default">
+          <div class="out-row" data-out="tpP">
             <div class="out-label">
-              <span class="k">02 · Aktiv Effekt</span>
+              <span class="k">02 · Aktiv Effekt <span class="chev">▶</span></span>
               <span class="n">P = S × cos φ</span>
             </div>
             <div class="out-val">
@@ -1365,10 +1366,11 @@
               <span class="u">kW</span>
             </div>
           </div>
+          <div class="explain" id="explaintpP"></div>
 
-          <div class="out-row" style="cursor:default">
+          <div class="out-row" data-out="tpQ">
             <div class="out-label">
-              <span class="k">03 · Reaktiv Effekt</span>
+              <span class="k">03 · Reaktiv Effekt <span class="chev">▶</span></span>
               <span class="n">Q = S × sin φ</span>
             </div>
             <div class="out-val">
@@ -1376,10 +1378,11 @@
               <span class="u">kVAR</span>
             </div>
           </div>
+          <div class="explain" id="explaintpQ"></div>
 
-          <div class="out-row" style="cursor:default;border-bottom:none">
+          <div class="out-row" data-out="tpPhi">
             <div class="out-label">
-              <span class="k">04 · Fasevinkel</span>
+              <span class="k">04 · Fasevinkel <span class="chev">▶</span></span>
               <span class="n">φ = arccos(cos φ)</span>
             </div>
             <div class="out-val">
@@ -1387,6 +1390,7 @@
               <span class="u">GRADER</span>
             </div>
           </div>
+          <div class="explain" id="explaintpPhi"></div>
 
           <div class="verdict" id="tpVerdict">
             <span class="ico"></span>
@@ -1943,6 +1947,8 @@
     const VL = parse(tpInputs.VL.value);
     const IL = parse(tpInputs.IL.value);
     const PF = parse(tpInputs.PF.value);
+    const frac = (top, bot) => `<span class="frac"><span class="num-top">${top}</span><span class="num-bot">${bot}</span></span>`;
+    const v = (txt) => `<span class="var">${txt}</span>`;
 
     if (isNaN(VL) || isNaN(IL) || VL <= 0 || IL <= 0) {
       outTpS.textContent = '—';
@@ -1951,14 +1957,19 @@
       outTpPhi.textContent = '—';
       tpVerdict.className = 'verdict';
       tpVerdictText.textContent = 'Indtast spænding og strøm for at beregne';
+      ['tpS','tpP','tpQ','tpPhi'].forEach(k => {
+        document.getElementById('explain'+k).innerHTML =
+          '<p class="note">Indtast linjespænding og linjestrøm for at se beregningen.</p>';
+      });
       return;
     }
 
     const S = Math.sqrt(3) * VL * IL;
     const hasPF = !isNaN(PF) && PF >= 0 && PF <= 1;
-    const P   = hasPF ? S * PF : NaN;
-    const Q   = hasPF ? S * Math.sqrt(1 - PF * PF) : NaN;
-    const phi = hasPF ? Math.acos(PF) * 180 / Math.PI : NaN;
+    const P      = hasPF ? S * PF : NaN;
+    const sinPhi = hasPF ? Math.sqrt(1 - PF * PF) : NaN;
+    const Q      = hasPF ? S * sinPhi : NaN;
+    const phi    = hasPF ? Math.acos(PF) * 180 / Math.PI : NaN;
 
     outTpS.textContent   = fmt(S / 1000);
     outTpP.textContent   = hasPF ? fmt(P / 1000) : '—';
@@ -1980,6 +1991,58 @@
       tpVerdict.className = 'verdict';
       tpVerdictText.textContent = 'Tilføj effektfaktor for fuld beregning';
     }
+
+    // === Forklaringer ===
+    // 01 · Tilsyneladende effekt
+    let sEx = '<h4>Formel</h4>';
+    sEx += `<div class="formula-block">${v('S')} <span class="eq">=</span> √3 × ${v('V')}<sub>L</sub> × ${v('I')}<sub>L</sub></div>`;
+    sEx += '<h4>Indsat</h4>';
+    sEx += `<div class="step">${v('V')}<sub>L</sub> (linjespænding) = <span class="num">${fmt(VL)}</span> V</div>`;
+    sEx += `<div class="step">${v('I')}<sub>L</sub> (linjestrøm) = <span class="num">${fmt(IL)}</span> A</div>`;
+    sEx += `<div class="result-line">${v('S')} = 1,732 × <span class="num">${fmt(VL)}</span> × <span class="num">${fmt(IL)}</span> = <span class="num">${fmt(S/1000)}</span> kVA</div>`;
+    sEx += '<p class="note">Tilsyneladende effekt er den samlede elektriske belastning — produktet af spænding og strøm. Den inkluderer både det nyttige arbejde og den reaktive del, og angiver hvad forsyningen skal kunne levere.</p>';
+    document.getElementById('explaintpS').innerHTML = sEx;
+
+    // 02 · Aktiv effekt
+    let pEx = '<h4>Formel</h4>';
+    pEx += `<div class="formula-block">${v('P')} <span class="eq">=</span> ${v('S')} × cos φ</div>`;
+    if (hasPF) {
+      pEx += '<h4>Indsat</h4>';
+      pEx += `<div class="step">${v('S')} (tilsyneladende effekt) = <span class="num">${fmt(S/1000)}</span> kVA</div>`;
+      pEx += `<div class="step">cos φ (effektfaktor) = <span class="num">${fmt(PF)}</span></div>`;
+      pEx += `<div class="result-line">${v('P')} = <span class="num">${fmt(S/1000)}</span> × <span class="num">${fmt(PF)}</span> = <span class="num">${fmt(P/1000)}</span> kW</div>`;
+      pEx += '<p class="note">Aktiv effekt er den del der rent faktisk udfører arbejde — omsættes til varme, lys eller bevægelse. Jo tættere effektfaktoren er på 1, desto mere af den tilsyneladende effekt er nyttig aktiv effekt.</p>';
+    } else {
+      pEx += '<p class="note">Indtast effektfaktor (cos φ) for at beregne aktiv effekt.</p>';
+    }
+    document.getElementById('explaintpP').innerHTML = pEx;
+
+    // 03 · Reaktiv effekt
+    let qEx = '<h4>Formel</h4>';
+    qEx += `<div class="formula-block">${v('Q')} <span class="eq">=</span> ${v('S')} × sin φ <span class="eq">=</span> ${v('S')} × √(1 − cos²φ)</div>`;
+    if (hasPF) {
+      qEx += '<h4>Indsat</h4>';
+      qEx += `<div class="step">${v('S')} = <span class="num">${fmt(S/1000)}</span> kVA</div>`;
+      qEx += `<div class="step">sin φ = √(1 − <span class="num">${fmt(PF)}</span>²) = √(1 − <span class="num">${fmt(PF*PF)}</span>) = <span class="num">${fmt(sinPhi)}</span></div>`;
+      qEx += `<div class="result-line">${v('Q')} = <span class="num">${fmt(S/1000)}</span> × <span class="num">${fmt(sinPhi)}</span> = <span class="num">${fmt(Q/1000)}</span> kVAR</div>`;
+      qEx += '<p class="note">Reaktiv effekt opstår i induktive komponenter (motorer, transformatorer). Den udfører intet arbejde men belaster elnettet og kablerne. Høj reaktiv effekt giver lavere effektfaktor og øgede tab.</p>';
+    } else {
+      qEx += '<p class="note">Indtast effektfaktor (cos φ) for at beregne reaktiv effekt.</p>';
+    }
+    document.getElementById('explaintpQ').innerHTML = qEx;
+
+    // 04 · Fasevinkel
+    let phiEx = '<h4>Formel</h4>';
+    phiEx += `<div class="formula-block">φ <span class="eq">=</span> arccos(cos φ)</div>`;
+    if (hasPF) {
+      phiEx += '<h4>Indsat</h4>';
+      phiEx += `<div class="step">cos φ (effektfaktor) = <span class="num">${fmt(PF)}</span></div>`;
+      phiEx += `<div class="result-line">φ = arccos(<span class="num">${fmt(PF)}</span>) = <span class="num">${fmt(phi)}</span>°</div>`;
+      phiEx += '<p class="note">Fasevinklen er vinklen mellem spænding og strøm. Ved φ = 0° er de helt i fase og effektfaktoren er 1 — mest effektivt. Jo større vinkel, desto mere reaktiv belastning og desto mere unødig strøm i kablerne.</p>';
+    } else {
+      phiEx += '<p class="note">Indtast effektfaktor (cos φ) for at beregne fasevinklen.</p>';
+    }
+    document.getElementById('explaintpPhi').innerHTML = phiEx;
   };
 
   Object.values(tpInputs).forEach(el => el.addEventListener('input', computeThreePhase));
