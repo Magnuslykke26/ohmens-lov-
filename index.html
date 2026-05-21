@@ -61,6 +61,38 @@
     padding:32px 24px 80px;
   }
 
+  /* Nav bar */
+  .navbar{
+    position:sticky;
+    top:0;
+    z-index:100;
+    background:rgba(10,14,12,0.92);
+    backdrop-filter:blur(8px);
+    border-bottom:1px solid var(--line-2);
+    display:flex;
+    align-items:center;
+    gap:0;
+    padding:0 24px;
+    margin:0 -24px 32px;
+  }
+  .navbar a{
+    display:inline-block;
+    font-family:'Inter', system-ui, sans-serif;
+    font-size:11px;
+    letter-spacing:.2em;
+    text-transform:uppercase;
+    color:var(--ink-dim);
+    text-decoration:none;
+    padding:14px 18px;
+    border-bottom:2px solid transparent;
+    transition:color .2s, border-color .2s;
+  }
+  .navbar a:hover{color:var(--ink)}
+  .navbar a.active{
+    color:var(--neon);
+    border-bottom-color:var(--neon);
+  }
+
   /* Top bar */
   .topbar{
     display:flex;
@@ -897,6 +929,10 @@
 </head>
 <body>
   <div class="wrap">
+    <nav class="navbar">
+      <a href="index.html" class="active">Ohms lov</a>
+    </nav>
+
     <div class="topbar reveal d1">
       <div></div>
       <div>EL/01 — Ohms Lov</div>
