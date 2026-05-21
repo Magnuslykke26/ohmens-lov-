@@ -1296,6 +1296,106 @@
     </section>
 
 
+    <section class="cable-section reveal d5" aria-label="Three-phase power calculator">
+      <div class="section-head">
+        <h2>3-Phase<br><span class="accent">Power</span></h2>
+        <p class="desc">
+          Calculate apparent, active and reactive power in a three-phase system. Enter line voltage, line current and power factor.
+        </p>
+      </div>
+
+      <div class="cable-grid">
+        <div class="cable-inputs" style="grid-template-columns:repeat(3,1fr)">
+          <div class="cable-cell">
+            <div class="label">
+              <span>A · Line Voltage</span>
+              <span style="font-family:'STIX Two Text',Cambria,Georgia,serif;font-style:italic;color:var(--amber);font-size:18px">V<sub style="font-size:11px">L</sub></span>
+            </div>
+            <div class="unit-name">Line-to-line</div>
+            <div class="input-row">
+              <input type="text" inputmode="decimal" id="tpVL" placeholder="400" autocomplete="off"/>
+              <span class="unit">V</span>
+            </div>
+          </div>
+
+          <div class="cable-cell">
+            <div class="label">
+              <span>B · Line Current</span>
+              <span style="font-family:'STIX Two Text',Cambria,Georgia,serif;font-style:italic;color:var(--amber);font-size:18px">I<sub style="font-size:11px">L</sub></span>
+            </div>
+            <div class="unit-name">Per phase</div>
+            <div class="input-row">
+              <input type="text" inputmode="decimal" id="tpIL" placeholder="10" autocomplete="off"/>
+              <span class="unit">A</span>
+            </div>
+          </div>
+
+          <div class="cable-cell">
+            <div class="label">
+              <span>C · Power Factor</span>
+              <span style="font-family:'STIX Two Text',Cambria,Georgia,serif;font-style:italic;color:var(--amber);font-size:18px">cos φ</span>
+            </div>
+            <div class="unit-name">0 → 1</div>
+            <div class="input-row">
+              <input type="text" inputmode="decimal" id="tpPF" placeholder="0,9" autocomplete="off"/>
+              <span class="unit">—</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="cable-output">
+          <div class="out-row" style="cursor:default">
+            <div class="out-label">
+              <span class="k">01 · Apparent Power</span>
+              <span class="n">S = √3 × V<sub>L</sub> × I<sub>L</sub></span>
+            </div>
+            <div class="out-val">
+              <span class="v" id="outTpS">—</span>
+              <span class="u">kVA</span>
+            </div>
+          </div>
+
+          <div class="out-row" style="cursor:default">
+            <div class="out-label">
+              <span class="k">02 · Active Power</span>
+              <span class="n">P = S × cos φ</span>
+            </div>
+            <div class="out-val">
+              <span class="v" id="outTpP">—</span>
+              <span class="u">kW</span>
+            </div>
+          </div>
+
+          <div class="out-row" style="cursor:default">
+            <div class="out-label">
+              <span class="k">03 · Reactive Power</span>
+              <span class="n">Q = S × sin φ</span>
+            </div>
+            <div class="out-val">
+              <span class="v" id="outTpQ">—</span>
+              <span class="u">kVAR</span>
+            </div>
+          </div>
+
+          <div class="out-row" style="cursor:default;border-bottom:none">
+            <div class="out-label">
+              <span class="k">04 · Phase Angle</span>
+              <span class="n">φ = arccos(PF)</span>
+            </div>
+            <div class="out-val">
+              <span class="v" id="outTpPhi">—</span>
+              <span class="u">DEG</span>
+            </div>
+          </div>
+
+          <div class="verdict" id="tpVerdict">
+            <span class="ico"></span>
+            <span id="tpVerdictText">Enter voltage, current and power factor</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
       <span>EL/01 · Ohms lov · 1827</span>
       <span class="sig">Bygget med strøm og lidt modstand.</span>
     </div>
@@ -1825,6 +1925,64 @@
     awgSelect.value = '';
     awgInfo.textContent = '';
   });
+
+  // ===== THREE-PHASE POWER CALCULATOR =====
+  const tpInputs = {
+    VL: document.getElementById('tpVL'),
+    IL: document.getElementById('tpIL'),
+    PF: document.getElementById('tpPF'),
+  };
+  const outTpS       = document.getElementById('outTpS');
+  const outTpP       = document.getElementById('outTpP');
+  const outTpQ       = document.getElementById('outTpQ');
+  const outTpPhi     = document.getElementById('outTpPhi');
+  const tpVerdict    = document.getElementById('tpVerdict');
+  const tpVerdictText= document.getElementById('tpVerdictText');
+
+  const computeThreePhase = () => {
+    const VL = parse(tpInputs.VL.value);
+    const IL = parse(tpInputs.IL.value);
+    const PF = parse(tpInputs.PF.value);
+
+    if (isNaN(VL) || isNaN(IL) || VL <= 0 || IL <= 0) {
+      outTpS.textContent = '—';
+      outTpP.textContent = '—';
+      outTpQ.textContent = '—';
+      outTpPhi.textContent = '—';
+      tpVerdict.className = 'verdict';
+      tpVerdictText.textContent = 'Enter voltage and current to calculate';
+      return;
+    }
+
+    const S = Math.sqrt(3) * VL * IL;
+    const hasPF = !isNaN(PF) && PF >= 0 && PF <= 1;
+    const P   = hasPF ? S * PF : NaN;
+    const Q   = hasPF ? S * Math.sqrt(1 - PF * PF) : NaN;
+    const phi = hasPF ? Math.acos(PF) * 180 / Math.PI : NaN;
+
+    outTpS.textContent   = fmt(S / 1000);
+    outTpP.textContent   = hasPF ? fmt(P / 1000) : '—';
+    outTpQ.textContent   = hasPF ? fmt(Q / 1000) : '—';
+    outTpPhi.textContent = hasPF ? fmt(phi) : '—';
+
+    if (hasPF) {
+      if (PF < 0.7) {
+        tpVerdict.className = 'verdict warn';
+        tpVerdictText.textContent = 'Poor power factor · consider correction';
+      } else if (PF < 0.9) {
+        tpVerdict.className = 'verdict amber';
+        tpVerdictText.textContent = 'Acceptable · aim for above 0.9';
+      } else {
+        tpVerdict.className = 'verdict';
+        tpVerdictText.textContent = 'Good power factor · OK';
+      }
+    } else {
+      tpVerdict.className = 'verdict';
+      tpVerdictText.textContent = 'Add power factor for full calculation';
+    }
+  };
+
+  Object.values(tpInputs).forEach(el => el.addEventListener('input', computeThreePhase));
 
   // Click handlers for expanding explanations
   document.querySelectorAll('.out-row[data-out]').forEach(row => {
