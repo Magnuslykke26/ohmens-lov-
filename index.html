@@ -1296,11 +1296,11 @@
     </section>
 
 
-    <section class="cable-section reveal d5" aria-label="Three-phase power calculator">
+    <section class="cable-section reveal d5" aria-label="3-faset effektberegner">
       <div class="section-head">
-        <h2>3-Phase<br><span class="accent">Power</span></h2>
+        <h2>3-Faset<br><span class="accent">Effekt</span></h2>
         <p class="desc">
-          Calculate apparent, active and reactive power in a three-phase system. Enter line voltage, line current and power factor.
+          Beregn tilsyneladende, aktiv og reaktiv effekt i et 3-faset system. Indtast linjespænding, linjestrøm og effektfaktor.
         </p>
       </div>
 
@@ -1308,10 +1308,10 @@
         <div class="cable-inputs" style="grid-template-columns:repeat(3,1fr)">
           <div class="cable-cell">
             <div class="label">
-              <span>A · Line Voltage</span>
+              <span>A · Linjespænding</span>
               <span style="font-family:'STIX Two Text',Cambria,Georgia,serif;font-style:italic;color:var(--amber);font-size:18px">V<sub style="font-size:11px">L</sub></span>
             </div>
-            <div class="unit-name">Line-to-line</div>
+            <div class="unit-name">Fase til fase</div>
             <div class="input-row">
               <input type="text" inputmode="decimal" id="tpVL" placeholder="400" autocomplete="off"/>
               <span class="unit">V</span>
@@ -1320,10 +1320,10 @@
 
           <div class="cable-cell">
             <div class="label">
-              <span>B · Line Current</span>
+              <span>B · Linjestrøm</span>
               <span style="font-family:'STIX Two Text',Cambria,Georgia,serif;font-style:italic;color:var(--amber);font-size:18px">I<sub style="font-size:11px">L</sub></span>
             </div>
-            <div class="unit-name">Per phase</div>
+            <div class="unit-name">Per fase</div>
             <div class="input-row">
               <input type="text" inputmode="decimal" id="tpIL" placeholder="10" autocomplete="off"/>
               <span class="unit">A</span>
@@ -1332,7 +1332,7 @@
 
           <div class="cable-cell">
             <div class="label">
-              <span>C · Power Factor</span>
+              <span>C · Effektfaktor</span>
               <span style="font-family:'STIX Two Text',Cambria,Georgia,serif;font-style:italic;color:var(--amber);font-size:18px">cos φ</span>
             </div>
             <div class="unit-name">0 → 1</div>
@@ -1346,7 +1346,7 @@
         <div class="cable-output">
           <div class="out-row" style="cursor:default">
             <div class="out-label">
-              <span class="k">01 · Apparent Power</span>
+              <span class="k">01 · Tilsyneladende Effekt</span>
               <span class="n">S = √3 × V<sub>L</sub> × I<sub>L</sub></span>
             </div>
             <div class="out-val">
@@ -1357,7 +1357,7 @@
 
           <div class="out-row" style="cursor:default">
             <div class="out-label">
-              <span class="k">02 · Active Power</span>
+              <span class="k">02 · Aktiv Effekt</span>
               <span class="n">P = S × cos φ</span>
             </div>
             <div class="out-val">
@@ -1368,7 +1368,7 @@
 
           <div class="out-row" style="cursor:default">
             <div class="out-label">
-              <span class="k">03 · Reactive Power</span>
+              <span class="k">03 · Reaktiv Effekt</span>
               <span class="n">Q = S × sin φ</span>
             </div>
             <div class="out-val">
@@ -1379,18 +1379,18 @@
 
           <div class="out-row" style="cursor:default;border-bottom:none">
             <div class="out-label">
-              <span class="k">04 · Phase Angle</span>
-              <span class="n">φ = arccos(PF)</span>
+              <span class="k">04 · Fasevinkel</span>
+              <span class="n">φ = arccos(cos φ)</span>
             </div>
             <div class="out-val">
               <span class="v" id="outTpPhi">—</span>
-              <span class="u">DEG</span>
+              <span class="u">GRADER</span>
             </div>
           </div>
 
           <div class="verdict" id="tpVerdict">
             <span class="ico"></span>
-            <span id="tpVerdictText">Enter voltage, current and power factor</span>
+            <span id="tpVerdictText">Indtast spænding, strøm og effektfaktor</span>
           </div>
         </div>
       </div>
@@ -1950,7 +1950,7 @@
       outTpQ.textContent = '—';
       outTpPhi.textContent = '—';
       tpVerdict.className = 'verdict';
-      tpVerdictText.textContent = 'Enter voltage and current to calculate';
+      tpVerdictText.textContent = 'Indtast spænding og strøm for at beregne';
       return;
     }
 
@@ -1968,17 +1968,17 @@
     if (hasPF) {
       if (PF < 0.7) {
         tpVerdict.className = 'verdict warn';
-        tpVerdictText.textContent = 'Poor power factor · consider correction';
+        tpVerdictText.textContent = 'Dårlig effektfaktor · overvej korrektion';
       } else if (PF < 0.9) {
         tpVerdict.className = 'verdict amber';
-        tpVerdictText.textContent = 'Acceptable · aim for above 0.9';
+        tpVerdictText.textContent = 'Acceptabel · sigt efter over 0,9';
       } else {
         tpVerdict.className = 'verdict';
-        tpVerdictText.textContent = 'Good power factor · OK';
+        tpVerdictText.textContent = 'God effektfaktor · OK';
       }
     } else {
       tpVerdict.className = 'verdict';
-      tpVerdictText.textContent = 'Add power factor for full calculation';
+      tpVerdictText.textContent = 'Tilføj effektfaktor for fuld beregning';
     }
   };
 
