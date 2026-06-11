@@ -6,7 +6,7 @@
 <title>Noter</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=STIX+Two+Text:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
   :root{
     --bg:#0a0e0c; --bg-2:#0f1612; --ink:#e6f1d9; --ink-dim:#8aa088;
@@ -57,96 +57,67 @@
 
   .hero{ margin-top:40px; margin-bottom:48px; }
   .hero h1{
-    font-size:clamp(2.4rem,6vw,4.2rem); font-weight:700; line-height:1.05;
-    letter-spacing:-.02em;
+    font-size:clamp(2.4rem,6vw,4.2rem); font-weight:700; line-height:1.05; letter-spacing:-.02em;
   }
   .hero h1 .accent{ color:var(--neon); }
   .hero p{ margin-top:16px; max-width:520px; color:var(--ink-dim); font-size:.95rem; line-height:1.65; }
 
-  /* ── Sektion labels ── */
   .section-label{
-    font-size:11px; letter-spacing:.18em; text-transform:uppercase;
-    color:var(--ink-dim); margin-bottom:14px;
+    font-size:11px; letter-spacing:.18em; text-transform:uppercase; color:var(--ink-dim);
   }
+
+  /* ── Delt textarea-stil ── */
+  .note-ta{
+    width:100%; background:var(--bg-2); border:1px solid var(--line-2); border-radius:6px;
+    color:var(--ink); font-family:'Inter', system-ui, sans-serif;
+    font-size:12px; line-height:1.75; padding:18px 20px;
+    resize:none; outline:none; overflow:hidden;
+    transition:border-color .2s; caret-color:var(--neon);
+  }
+  .note-ta:focus{ border-color:var(--neon-dim); }
+  .note-ta::placeholder{ color:var(--neon-dim); opacity:.5; }
 
   /* ── Noteblok ── */
   .notepad-wrap{ display:flex; flex-direction:column; gap:12px; margin-bottom:64px; }
   .notepad-toolbar{
     display:flex; align-items:center; justify-content:space-between; gap:12px; flex-wrap:wrap;
   }
-  .notepad-status{ font-size:11px; color:var(--neon-dim); letter-spacing:.05em; transition:opacity .4s; }
+  .notepad-status{ font-size:11px; color:var(--neon-dim); transition:color .4s; }
   .notepad-status.saved{ color:var(--neon); }
-  .notepad{
-    width:100%; min-height:220px;
-    background:var(--bg-2); border:1px solid var(--line-2); border-radius:6px;
-    color:var(--ink); font-family:'Inter', system-ui, sans-serif;
-    font-size:1rem; line-height:1.75; padding:24px 28px;
-    resize:vertical; outline:none; transition:border-color .2s; caret-color:var(--neon);
-  }
-  .notepad:focus{ border-color:var(--neon-dim); }
-  .notepad::placeholder{ color:var(--neon-dim); opacity:.5; }
-  .notepad-meta{ display:flex; justify-content:flex-end; font-size:11px; color:var(--ink-dim); letter-spacing:.05em; }
+  .notepad-meta{ display:flex; justify-content:flex-end; font-size:11px; color:var(--ink-dim); }
 
-  /* ── Beregninger ── */
-  .calc-notes-wrap{ display:flex; flex-direction:column; gap:20px; }
-
-  .calc-note-card{
-    background:var(--bg-2); border:1px solid var(--line-2); border-radius:6px;
-    overflow:hidden;
-  }
-  .calc-note-header{
+  /* ── Gemte beregninger ── */
+  .calc-header{
     display:flex; justify-content:space-between; align-items:center;
-    padding:12px 20px; border-bottom:1px solid var(--line-2);
-    background:rgba(155,255,91,0.03);
+    margin-bottom:16px; flex-wrap:wrap; gap:12px;
   }
-  .calc-note-header .source{
-    font-size:10px; letter-spacing:.2em; text-transform:uppercase; color:var(--neon-dim);
-  }
-  .calc-note-header .afsnit{
-    font-size:13px; color:var(--ink); font-weight:600;
-  }
-  .calc-note-header .ts{
-    font-size:10px; color:var(--ink-dim); letter-spacing:.05em;
-  }
-  .calc-note-meta{
-    padding:10px 20px; border-bottom:1px solid var(--line-2);
-    font-size:12px; color:var(--ink-dim); letter-spacing:.05em;
-  }
-  .calc-note-meta span{ color:var(--amber); }
+  .calc-notes-wrap{ display:flex; flex-direction:column; gap:12px; }
 
-  .calc-note-body{
-    padding:20px 0; display:flex; flex-direction:column; gap:0;
+  .calc-note-item{ display:flex; flex-direction:column; gap:6px; }
+  .calc-note-row{
+    display:flex; align-items:flex-start; gap:10px;
   }
-  .calc-note-line{
-    display:flex; flex-direction:column; align-items:center;
-    padding:16px 24px; border-bottom:1px dashed var(--line-2);
-  }
-  .calc-note-line:last-child{ border-bottom:none; }
-  .calc-note-line .beregning{
-    font-family:'STIX Two Text', Cambria, Georgia, serif;
-    font-style:italic; font-size:1.25rem; color:var(--amber);
-    text-align:center; line-height:1.5;
-  }
-  .calc-note-line .beregning .enhed{
-    font-size:1rem; color:var(--neon); margin-left:3px;
-  }
-
-  .calc-note-footer{
-    display:flex; justify-content:flex-end; padding:10px 16px;
-    border-top:1px solid var(--line-2); background:rgba(0,0,0,0.2);
-  }
+  .calc-note-row .note-ta{ flex:1; min-height:unset; }
   .del-btn{
-    font-family:'Inter', system-ui, sans-serif;
+    flex-shrink:0; font-family:'Inter', system-ui, sans-serif;
     font-size:10px; letter-spacing:.15em; text-transform:uppercase;
     background:transparent; border:1px solid rgba(255,92,77,0.3);
-    color:rgba(255,92,77,0.5); padding:5px 12px; cursor:pointer;
-    border-radius:2px; transition:all .2s;
+    color:rgba(255,92,77,0.5); padding:6px 10px; cursor:pointer;
+    border-radius:2px; transition:all .2s; margin-top:2px;
   }
   .del-btn:hover{ border-color:var(--red); color:var(--red); }
+  .clear-btn{
+    font-family:'Inter', system-ui, sans-serif;
+    font-size:10px; letter-spacing:.15em; text-transform:uppercase;
+    background:transparent; border:1px solid rgba(255,92,77,0.25);
+    color:rgba(255,92,77,0.4); padding:6px 14px; cursor:pointer;
+    border-radius:2px; transition:all .2s;
+  }
+  .clear-btn:hover{ border-color:var(--red); color:var(--red); }
 
   .empty-calc{
-    padding:48px 24px; text-align:center; border:1px dashed var(--line-2);
-    border-radius:6px; color:var(--ink-dim); font-size:.9rem; line-height:1.6;
+    padding:40px 24px; text-align:center; border:1px dashed var(--line-2);
+    border-radius:6px; color:var(--ink-dim); font-size:.85rem; line-height:1.6;
   }
 
   footer{
@@ -173,7 +144,7 @@
 
   <header class="hero">
     <h1>Mine<br><span class="accent">noter</span></h1>
-    <p>Fri noteblok og gemte beregninger fra alle sider.</p>
+    <p>Fri noteblok og redigerbare beregninger fra alle sider.</p>
   </header>
 
   <!-- ── Noteblok ── -->
@@ -182,16 +153,14 @@
       <span class="section-label">Noteblok</span>
       <span class="notepad-status" id="status">Ikke gemt endnu</span>
     </div>
-    <textarea class="notepad" id="notepad" placeholder="Begynd at skrive her…" spellcheck="true"></textarea>
-    <div class="notepad-meta">
-      <span id="wordcount">0 ord</span>
-    </div>
+    <textarea class="note-ta" id="notepad" placeholder="Begynd at skrive her…" spellcheck="true" style="min-height:200px; resize:vertical;"></textarea>
+    <div class="notepad-meta"><span id="wordcount">0 ord</span></div>
   </div>
 
   <!-- ── Gemte beregninger ── -->
-  <div style="margin-bottom:16px; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px;">
+  <div class="calc-header">
     <span class="section-label">Gemte beregninger</span>
-    <button class="del-btn" id="clearAllBtn" style="display:none">Slet alle</button>
+    <button class="clear-btn" id="clearAllBtn" style="display:none">Slet alle</button>
   </div>
   <div class="calc-notes-wrap" id="calcNotes"></div>
 
@@ -234,7 +203,20 @@
   function fmtTime(ts) {
     const d = new Date(ts);
     return d.toLocaleDateString('da-DK', { day:'numeric', month:'short' })
-      + ' · ' + d.toLocaleTimeString('da-DK', { hour:'2-digit', minute:'2-digit' });
+      + ' kl. ' + d.toLocaleTimeString('da-DK', { hour:'2-digit', minute:'2-digit' });
+  }
+
+  function noteToText(note) {
+    if (note.text !== undefined) return note.text;
+    const header = `${note.kilde} — ${note.afsnit} (${fmtTime(note.ts)})`;
+    const input = `Input: ${note.input}`;
+    const lines = note.linjer.map(l => (l.beregning ?? l.formel) + (l.enhed || '')).join('\n');
+    return [header, input, lines].join('\n');
+  }
+
+  function autoHeight(ta) {
+    ta.style.height = 'auto';
+    ta.style.height = ta.scrollHeight + 'px';
   }
 
   function renderNotes() {
@@ -243,43 +225,47 @@
     clearAllBtn.style.display = notes.length ? 'inline-block' : 'none';
 
     if (!notes.length) {
-      container.innerHTML = '<div class="empty-calc">Ingen gemte beregninger endnu.<br>Brug "+ Tilføj til noter" knappen på en beregningsside.</div>';
+      container.innerHTML = '<div class="empty-calc">Ingen gemte beregninger endnu.<br>Brug "+ Tilføj til noter" på en beregningsside.</div>';
       return;
     }
 
     notes.forEach((note, idx) => {
-      const card = document.createElement('div');
-      card.className = 'calc-note-card';
+      const item = document.createElement('div');
+      item.className = 'calc-note-item';
 
-      const lines = note.linjer.map(l => `
-        <div class="calc-note-line">
-          <div class="beregning">${l.beregning ?? l.formel}${l.enhed ? `<span class="enhed">${l.enhed}</span>` : ''}${!l.beregning && l.vaerdi ? ` = ${l.vaerdi}` : ''}</div>
-        </div>`).join('');
+      const row = document.createElement('div');
+      row.className = 'calc-note-row';
 
-      card.innerHTML = `
-        <div class="calc-note-header">
-          <div>
-            <div class="source">${note.kilde}</div>
-            <div class="afsnit">${note.afsnit}</div>
-          </div>
-          <div class="ts">${fmtTime(note.ts)}</div>
-        </div>
-        <div class="calc-note-meta">Input: <span>${note.input}</span></div>
-        <div class="calc-note-body">${lines}</div>
-        <div class="calc-note-footer">
-          <button class="del-btn" data-idx="${idx}">Slet</button>
-        </div>`;
+      const ta = document.createElement('textarea');
+      ta.className = 'note-ta';
+      ta.value = noteToText(note);
+      ta.spellcheck = false;
 
-      container.appendChild(card);
-    });
+      ta.addEventListener('input', () => {
+        autoHeight(ta);
+        const notes2 = JSON.parse(localStorage.getItem(NOTE_KEY) || '[]');
+        if (notes2[idx]) {
+          notes2[idx] = { ts: notes2[idx].ts, text: ta.value };
+          localStorage.setItem(NOTE_KEY, JSON.stringify(notes2));
+        }
+      });
 
-    container.querySelectorAll('.del-btn[data-idx]').forEach(btn => {
-      btn.addEventListener('click', () => {
-        const notes = JSON.parse(localStorage.getItem(NOTE_KEY) || '[]');
-        notes.splice(parseInt(btn.dataset.idx), 1);
-        localStorage.setItem(NOTE_KEY, JSON.stringify(notes));
+      const delBtn = document.createElement('button');
+      delBtn.className = 'del-btn';
+      delBtn.textContent = 'Slet';
+      delBtn.addEventListener('click', () => {
+        const notes2 = JSON.parse(localStorage.getItem(NOTE_KEY) || '[]');
+        notes2.splice(idx, 1);
+        localStorage.setItem(NOTE_KEY, JSON.stringify(notes2));
         renderNotes();
       });
+
+      row.appendChild(ta);
+      row.appendChild(delBtn);
+      item.appendChild(row);
+      container.appendChild(item);
+
+      autoHeight(ta);
     });
   }
 
@@ -289,8 +275,6 @@
   });
 
   renderNotes();
-
-  // Reload when navigating back to page
   window.addEventListener('pageshow', renderNotes);
 </script>
 </body>
