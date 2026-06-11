@@ -56,7 +56,7 @@
   }
 
   .hero{
-    margin-top:40px; margin-bottom:56px;
+    margin-top:40px; margin-bottom:48px;
   }
   .hero h1{
     font-size:clamp(2.4rem,6vw,4.2rem); font-weight:700; line-height:1.05;
@@ -67,14 +67,50 @@
     margin-top:16px; max-width:520px; color:var(--ink-dim); font-size:.95rem; line-height:1.65;
   }
 
-  .empty-state{
-    display:flex; flex-direction:column; align-items:center; justify-content:center;
-    gap:16px; padding:80px 24px; text-align:center;
-    border:1px dashed var(--line-2); border-radius:8px;
-    color:var(--ink-dim);
+  /* ── Noteblok ── */
+  .notepad-wrap{
+    display:flex; flex-direction:column; gap:12px;
   }
-  .empty-state svg{ opacity:.3; }
-  .empty-state p{ font-size:.9rem; line-height:1.6; max-width:340px; }
+  .notepad-toolbar{
+    display:flex; align-items:center; justify-content:space-between;
+    gap:12px; flex-wrap:wrap;
+  }
+  .notepad-title{
+    font-size:11px; letter-spacing:.18em; text-transform:uppercase; color:var(--ink-dim);
+  }
+  .notepad-status{
+    font-size:11px; color:var(--neon-dim); letter-spacing:.05em;
+    transition:opacity .4s;
+  }
+  .notepad-status.saved{ color:var(--neon); }
+
+  .notepad{
+    width:100%;
+    min-height:480px;
+    background:var(--bg-2);
+    border:1px solid var(--line-2);
+    border-radius:6px;
+    color:var(--ink);
+    font-family:'Inter', system-ui, sans-serif;
+    font-size:1rem;
+    line-height:1.75;
+    padding:24px 28px;
+    resize:vertical;
+    outline:none;
+    transition:border-color .2s;
+    caret-color:var(--neon);
+  }
+  .notepad:focus{
+    border-color:var(--neon-dim);
+  }
+  .notepad::placeholder{
+    color:var(--neon-dim); opacity:.5;
+  }
+
+  .notepad-meta{
+    display:flex; justify-content:flex-end;
+    font-size:11px; color:var(--ink-dim); letter-spacing:.05em;
+  }
 
   footer{
     margin-top:64px; border-top:1px solid var(--line);
@@ -100,22 +136,52 @@
 
   <header class="hero">
     <h1>Mine<br><span class="accent">noter</span></h1>
-    <p>Her samler du dine egne noter, opsummeringer og vigtige pointer fra undervisningen.</p>
+    <p>Skriv frit — dine noter gemmes automatisk i browseren.</p>
   </header>
 
-  <div class="empty-state">
-    <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
-      <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
-      <polyline points="14 2 14 8 20 8"/>
-      <line x1="16" y1="13" x2="8" y2="13"/>
-      <line x1="16" y1="17" x2="8" y2="17"/>
-      <polyline points="10 9 9 9 8 9"/>
-    </svg>
-    <p>Ingen noter endnu. Vi tilføjer indhold her efterhånden.</p>
+  <div class="notepad-wrap">
+    <div class="notepad-toolbar">
+      <span class="notepad-title">Noteblok</span>
+      <span class="notepad-status" id="status">Ikke gemt endnu</span>
+    </div>
+    <textarea class="notepad" id="notepad" placeholder="Begynd at skrive her…" spellcheck="true"></textarea>
+    <div class="notepad-meta">
+      <span id="wordcount">0 ord</span>
+    </div>
   </div>
 
   <footer>EL/04 · Noter</footer>
 
 </div>
+<script>
+  const pad = document.getElementById('notepad');
+  const status = document.getElementById('status');
+  const wc = document.getElementById('wordcount');
+  const KEY = 'noter-v1';
+
+  // Load saved content
+  pad.value = localStorage.getItem(KEY) || '';
+  updateMeta();
+
+  let saveTimer;
+  pad.addEventListener('input', () => {
+    updateMeta();
+    status.textContent = 'Gemmer…';
+    status.classList.remove('saved');
+    clearTimeout(saveTimer);
+    saveTimer = setTimeout(save, 800);
+  });
+
+  function save() {
+    localStorage.setItem(KEY, pad.value);
+    status.textContent = 'Gemt ✓';
+    status.classList.add('saved');
+  }
+
+  function updateMeta() {
+    const words = pad.value.trim() === '' ? 0 : pad.value.trim().split(/\s+/).length;
+    wc.textContent = words + (words === 1 ? ' ord' : ' ord');
+  }
+</script>
 </body>
 </html>
