@@ -55,61 +55,103 @@
     font-size:11px; letter-spacing:.18em; text-transform:uppercase; color:var(--ink-dim);
   }
 
-  .hero{
-    margin-top:40px; margin-bottom:48px;
-  }
+  .hero{ margin-top:40px; margin-bottom:48px; }
   .hero h1{
     font-size:clamp(2.4rem,6vw,4.2rem); font-weight:700; line-height:1.05;
     letter-spacing:-.02em;
   }
   .hero h1 .accent{ color:var(--neon); }
-  .hero p{
-    margin-top:16px; max-width:520px; color:var(--ink-dim); font-size:.95rem; line-height:1.65;
+  .hero p{ margin-top:16px; max-width:520px; color:var(--ink-dim); font-size:.95rem; line-height:1.65; }
+
+  /* ── Sektion labels ── */
+  .section-label{
+    font-size:11px; letter-spacing:.18em; text-transform:uppercase;
+    color:var(--ink-dim); margin-bottom:14px;
   }
 
   /* ── Noteblok ── */
-  .notepad-wrap{
-    display:flex; flex-direction:column; gap:12px;
-  }
+  .notepad-wrap{ display:flex; flex-direction:column; gap:12px; margin-bottom:64px; }
   .notepad-toolbar{
-    display:flex; align-items:center; justify-content:space-between;
-    gap:12px; flex-wrap:wrap;
+    display:flex; align-items:center; justify-content:space-between; gap:12px; flex-wrap:wrap;
   }
-  .notepad-title{
-    font-size:11px; letter-spacing:.18em; text-transform:uppercase; color:var(--ink-dim);
-  }
-  .notepad-status{
-    font-size:11px; color:var(--neon-dim); letter-spacing:.05em;
-    transition:opacity .4s;
-  }
+  .notepad-status{ font-size:11px; color:var(--neon-dim); letter-spacing:.05em; transition:opacity .4s; }
   .notepad-status.saved{ color:var(--neon); }
-
   .notepad{
-    width:100%;
-    min-height:480px;
-    background:var(--bg-2);
-    border:1px solid var(--line-2);
-    border-radius:6px;
-    color:var(--ink);
-    font-family:'Inter', system-ui, sans-serif;
-    font-size:1rem;
-    line-height:1.75;
-    padding:24px 28px;
-    resize:vertical;
-    outline:none;
-    transition:border-color .2s;
-    caret-color:var(--neon);
+    width:100%; min-height:220px;
+    background:var(--bg-2); border:1px solid var(--line-2); border-radius:6px;
+    color:var(--ink); font-family:'Inter', system-ui, sans-serif;
+    font-size:1rem; line-height:1.75; padding:24px 28px;
+    resize:vertical; outline:none; transition:border-color .2s; caret-color:var(--neon);
   }
-  .notepad:focus{
-    border-color:var(--neon-dim);
+  .notepad:focus{ border-color:var(--neon-dim); }
+  .notepad::placeholder{ color:var(--neon-dim); opacity:.5; }
+  .notepad-meta{ display:flex; justify-content:flex-end; font-size:11px; color:var(--ink-dim); letter-spacing:.05em; }
+
+  /* ── Beregninger ── */
+  .calc-notes-wrap{ display:flex; flex-direction:column; gap:20px; }
+
+  .calc-note-card{
+    background:var(--bg-2); border:1px solid var(--line-2); border-radius:6px;
+    overflow:hidden;
   }
-  .notepad::placeholder{
-    color:var(--neon-dim); opacity:.5;
+  .calc-note-header{
+    display:flex; justify-content:space-between; align-items:center;
+    padding:12px 20px; border-bottom:1px solid var(--line-2);
+    background:rgba(155,255,91,0.03);
+  }
+  .calc-note-header .source{
+    font-size:10px; letter-spacing:.2em; text-transform:uppercase; color:var(--neon-dim);
+  }
+  .calc-note-header .afsnit{
+    font-size:13px; color:var(--ink); font-weight:600;
+  }
+  .calc-note-header .ts{
+    font-size:10px; color:var(--ink-dim); letter-spacing:.05em;
+  }
+  .calc-note-meta{
+    padding:10px 20px; border-bottom:1px solid var(--line-2);
+    font-size:12px; color:var(--ink-dim); letter-spacing:.05em;
+  }
+  .calc-note-meta span{ color:var(--amber); }
+
+  .calc-note-body{
+    padding:20px 0; display:flex; flex-direction:column; gap:0;
+  }
+  .calc-note-line{
+    display:flex; flex-direction:column; align-items:center;
+    padding:14px 24px; border-bottom:1px dashed var(--line-2);
+  }
+  .calc-note-line:last-child{ border-bottom:none; }
+  .calc-note-line .formel{
+    font-family:'STIX Two Text', Cambria, Georgia, serif;
+    font-style:italic; font-size:1.1rem; color:var(--ink-dim);
+    text-align:center;
+  }
+  .calc-note-line .result{
+    margin-top:6px; text-align:center;
+    font-family:'STIX Two Text', Cambria, Georgia, serif;
+    font-style:italic; font-size:1.5rem; color:var(--amber); font-weight:600;
+  }
+  .calc-note-line .result .enhed{
+    font-size:1rem; color:var(--neon); margin-left:4px; font-weight:400;
   }
 
-  .notepad-meta{
-    display:flex; justify-content:flex-end;
-    font-size:11px; color:var(--ink-dim); letter-spacing:.05em;
+  .calc-note-footer{
+    display:flex; justify-content:flex-end; padding:10px 16px;
+    border-top:1px solid var(--line-2); background:rgba(0,0,0,0.2);
+  }
+  .del-btn{
+    font-family:'Inter', system-ui, sans-serif;
+    font-size:10px; letter-spacing:.15em; text-transform:uppercase;
+    background:transparent; border:1px solid rgba(255,92,77,0.3);
+    color:rgba(255,92,77,0.5); padding:5px 12px; cursor:pointer;
+    border-radius:2px; transition:all .2s;
+  }
+  .del-btn:hover{ border-color:var(--red); color:var(--red); }
+
+  .empty-calc{
+    padding:48px 24px; text-align:center; border:1px dashed var(--line-2);
+    border-radius:6px; color:var(--ink-dim); font-size:.9rem; line-height:1.6;
   }
 
   footer{
@@ -136,12 +178,13 @@
 
   <header class="hero">
     <h1>Mine<br><span class="accent">noter</span></h1>
-    <p>Skriv frit — dine noter gemmes automatisk i browseren.</p>
+    <p>Fri noteblok og gemte beregninger fra alle sider.</p>
   </header>
 
+  <!-- ── Noteblok ── -->
   <div class="notepad-wrap">
     <div class="notepad-toolbar">
-      <span class="notepad-title">Noteblok</span>
+      <span class="section-label">Noteblok</span>
       <span class="notepad-status" id="status">Ikke gemt endnu</span>
     </div>
     <textarea class="notepad" id="notepad" placeholder="Begynd at skrive her…" spellcheck="true"></textarea>
@@ -150,17 +193,24 @@
     </div>
   </div>
 
+  <!-- ── Gemte beregninger ── -->
+  <div style="margin-bottom:16px; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px;">
+    <span class="section-label">Gemte beregninger</span>
+    <button class="del-btn" id="clearAllBtn" style="display:none">Slet alle</button>
+  </div>
+  <div class="calc-notes-wrap" id="calcNotes"></div>
+
   <footer>EL/04 · Noter</footer>
 
 </div>
 <script>
+  // ── Noteblok ──
   const pad = document.getElementById('notepad');
   const status = document.getElementById('status');
   const wc = document.getElementById('wordcount');
-  const KEY = 'noter-v1';
+  const PAD_KEY = 'noter-v1';
 
-  // Load saved content
-  pad.value = localStorage.getItem(KEY) || '';
+  pad.value = localStorage.getItem(PAD_KEY) || '';
   updateMeta();
 
   let saveTimer;
@@ -169,19 +219,85 @@
     status.textContent = 'Gemmer…';
     status.classList.remove('saved');
     clearTimeout(saveTimer);
-    saveTimer = setTimeout(save, 800);
+    saveTimer = setTimeout(() => {
+      localStorage.setItem(PAD_KEY, pad.value);
+      status.textContent = 'Gemt ✓';
+      status.classList.add('saved');
+    }, 800);
   });
-
-  function save() {
-    localStorage.setItem(KEY, pad.value);
-    status.textContent = 'Gemt ✓';
-    status.classList.add('saved');
-  }
 
   function updateMeta() {
     const words = pad.value.trim() === '' ? 0 : pad.value.trim().split(/\s+/).length;
-    wc.textContent = words + (words === 1 ? ' ord' : ' ord');
+    wc.textContent = words + ' ord';
   }
+
+  // ── Gemte beregninger ──
+  const NOTE_KEY = 'noter-beregninger-v1';
+  const container = document.getElementById('calcNotes');
+  const clearAllBtn = document.getElementById('clearAllBtn');
+
+  function fmtTime(ts) {
+    const d = new Date(ts);
+    return d.toLocaleDateString('da-DK', { day:'numeric', month:'short' })
+      + ' · ' + d.toLocaleTimeString('da-DK', { hour:'2-digit', minute:'2-digit' });
+  }
+
+  function renderNotes() {
+    const notes = JSON.parse(localStorage.getItem(NOTE_KEY) || '[]');
+    container.innerHTML = '';
+    clearAllBtn.style.display = notes.length ? 'inline-block' : 'none';
+
+    if (!notes.length) {
+      container.innerHTML = '<div class="empty-calc">Ingen gemte beregninger endnu.<br>Brug "+ Tilføj til noter" knappen på en beregningsside.</div>';
+      return;
+    }
+
+    notes.forEach((note, idx) => {
+      const card = document.createElement('div');
+      card.className = 'calc-note-card';
+
+      const lines = note.linjer.map(l => `
+        <div class="calc-note-line">
+          <div class="formel">${l.formel}</div>
+          <div class="result">${l.vaerdi}${l.enhed ? `<span class="enhed">${l.enhed}</span>` : ''}</div>
+        </div>`).join('');
+
+      card.innerHTML = `
+        <div class="calc-note-header">
+          <div>
+            <div class="source">${note.kilde}</div>
+            <div class="afsnit">${note.afsnit}</div>
+          </div>
+          <div class="ts">${fmtTime(note.ts)}</div>
+        </div>
+        <div class="calc-note-meta">Input: <span>${note.input}</span></div>
+        <div class="calc-note-body">${lines}</div>
+        <div class="calc-note-footer">
+          <button class="del-btn" data-idx="${idx}">Slet</button>
+        </div>`;
+
+      container.appendChild(card);
+    });
+
+    container.querySelectorAll('.del-btn[data-idx]').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const notes = JSON.parse(localStorage.getItem(NOTE_KEY) || '[]');
+        notes.splice(parseInt(btn.dataset.idx), 1);
+        localStorage.setItem(NOTE_KEY, JSON.stringify(notes));
+        renderNotes();
+      });
+    });
+  }
+
+  clearAllBtn.addEventListener('click', () => {
+    localStorage.removeItem(NOTE_KEY);
+    renderNotes();
+  });
+
+  renderNotes();
+
+  // Reload when navigating back to page
+  window.addEventListener('pageshow', renderNotes);
 </script>
 </body>
 </html>
