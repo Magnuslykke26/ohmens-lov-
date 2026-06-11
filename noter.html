@@ -119,21 +119,16 @@
   }
   .calc-note-line{
     display:flex; flex-direction:column; align-items:center;
-    padding:14px 24px; border-bottom:1px dashed var(--line-2);
+    padding:16px 24px; border-bottom:1px dashed var(--line-2);
   }
   .calc-note-line:last-child{ border-bottom:none; }
-  .calc-note-line .formel{
+  .calc-note-line .beregning{
     font-family:'STIX Two Text', Cambria, Georgia, serif;
-    font-style:italic; font-size:1.1rem; color:var(--ink-dim);
-    text-align:center;
+    font-style:italic; font-size:1.25rem; color:var(--amber);
+    text-align:center; line-height:1.5;
   }
-  .calc-note-line .result{
-    margin-top:6px; text-align:center;
-    font-family:'STIX Two Text', Cambria, Georgia, serif;
-    font-style:italic; font-size:1.5rem; color:var(--amber); font-weight:600;
-  }
-  .calc-note-line .result .enhed{
-    font-size:1rem; color:var(--neon); margin-left:4px; font-weight:400;
+  .calc-note-line .beregning .enhed{
+    font-size:1rem; color:var(--neon); margin-left:3px;
   }
 
   .calc-note-footer{
@@ -258,8 +253,7 @@
 
       const lines = note.linjer.map(l => `
         <div class="calc-note-line">
-          <div class="formel">${l.formel}</div>
-          <div class="result">${l.vaerdi}${l.enhed ? `<span class="enhed">${l.enhed}</span>` : ''}</div>
+          <div class="beregning">${l.beregning ?? l.formel}${l.enhed ? `<span class="enhed">${l.enhed}</span>` : ''}${!l.beregning && l.vaerdi ? ` = ${l.vaerdi}` : ''}</div>
         </div>`).join('');
 
       card.innerHTML = `

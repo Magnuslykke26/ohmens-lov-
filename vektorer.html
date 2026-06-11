@@ -618,10 +618,10 @@
       ts: Date.now(), kilde: 'Vektorer', afsnit: '2D Vektor grundlæggende',
       input: `v = (${fmt(x)}, ${fmt(y)})`,
       linjer: [
-        { formel: '|v| = √(x² + y²)', vaerdi: fmt(mag), enhed: '' },
-        { formel: 'θ = arctan(y / x)', vaerdi: fmt(ang), enhed: '°' },
-        { formel: 'x̂ = x / |v|', vaerdi: fmt(x/mag), enhed: '' },
-        { formel: 'ŷ = y / |v|', vaerdi: fmt(y/mag), enhed: '' },
+        { beregning: `|v| = √(${fmt(x)}² + ${fmt(y)}²) = ${fmt(mag)}`, enhed: '' },
+        { beregning: `θ = arctan(${fmt(y)} / ${fmt(x)}) = ${fmt(ang)}`, enhed: '°' },
+        { beregning: `x̂ = ${fmt(x)} / ${fmt(mag)} = ${fmt(x/mag)}`, enhed: '' },
+        { beregning: `ŷ = ${fmt(y)} / ${fmt(mag)} = ${fmt(y/mag)}`, enhed: '' },
       ]
     }));
   }
@@ -648,10 +648,10 @@
       ts: Date.now(), kilde: 'Vektorer', afsnit: 'Vektor addition',
       input: `A = (${fmt(ax)}, ${fmt(ay)}), B = (${fmt(bx)}, ${fmt(by)})`,
       linjer: [
-        { formel: 'rx = ax + bx', vaerdi: fmt(rx), enhed: '' },
-        { formel: 'ry = ay + by', vaerdi: fmt(ry), enhed: '' },
-        { formel: '|r| = √(rx² + ry²)', vaerdi: fmt(mag), enhed: '' },
-        { formel: 'θ = arctan(ry / rx)', vaerdi: fmt(ang), enhed: '°' },
+        { beregning: `rx = ${fmt(ax)} + ${fmt(bx)} = ${fmt(rx)}`, enhed: '' },
+        { beregning: `ry = ${fmt(ay)} + ${fmt(by)} = ${fmt(ry)}`, enhed: '' },
+        { beregning: `|r| = √(${fmt(rx)}² + ${fmt(ry)}²) = ${fmt(mag)}`, enhed: '' },
+        { beregning: `θ = arctan(${fmt(ry)} / ${fmt(rx)}) = ${fmt(ang)}`, enhed: '°' },
       ]
     }));
   }
@@ -682,9 +682,9 @@
       ts: Date.now(), kilde: 'Vektorer', afsnit: 'Prikprodukt og vinkel',
       input: `A = (${fmt(ax)}, ${fmt(ay)}), B = (${fmt(bx)}, ${fmt(by)})`,
       linjer: [
-        { formel: 'A · B = ax·bx + ay·by', vaerdi: fmt(dot), enhed: '' },
-        { formel: '|A| · |B|', vaerdi: fmt(magProd), enhed: '' },
-        { formel: 'θ = arccos(A·B / |A||B|)', vaerdi: fmt(angle), enhed: '°' },
+        { beregning: `A · B = ${fmt(ax)}·${fmt(bx)} + ${fmt(ay)}·${fmt(by)} = ${fmt(dot)}`, enhed: '' },
+        { beregning: `|A| · |B| = ${fmt(magA)} · ${fmt(magB)} = ${fmt(magProd)}`, enhed: '' },
+        { beregning: `θ = arccos(${fmt(dot)} / ${fmt(magProd)}) = ${fmt(angle)}`, enhed: '°' },
       ]
     }));
   }
@@ -707,8 +707,8 @@
       ts: Date.now(), kilde: 'Vektorer', afsnit: 'Polær → Kartesisk',
       input: `r = ${fmt(r)}, θ = ${fmt(theta)}°`,
       linjer: [
-        { formel: 'x = r · cos θ', vaerdi: fmt(x), enhed: '' },
-        { formel: 'y = r · sin θ', vaerdi: fmt(y), enhed: '' },
+        { beregning: `x = ${fmt(r)} · cos(${fmt(theta)}°) = ${fmt(x)}`, enhed: '' },
+        { beregning: `y = ${fmt(r)} · sin(${fmt(theta)}°) = ${fmt(y)}`, enhed: '' },
       ]
     }));
   }
@@ -731,8 +731,8 @@
       ts: Date.now(), kilde: 'Vektorer', afsnit: 'Kartesisk → Polær',
       input: `x = ${fmt(x)}, y = ${fmt(y)}`,
       linjer: [
-        { formel: 'r = √(x² + y²)', vaerdi: fmt(r), enhed: '' },
-        { formel: 'θ = arctan(y / x)', vaerdi: fmt(theta), enhed: '°' },
+        { beregning: `r = √(${fmt(x)}² + ${fmt(y)}²) = ${fmt(r)}`, enhed: '' },
+        { beregning: `θ = arctan(${fmt(y)} / ${fmt(x)}) = ${fmt(theta)}`, enhed: '°' },
       ]
     }));
   }
