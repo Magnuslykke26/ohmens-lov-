@@ -1464,6 +1464,126 @@
       </div>
     </section>
 
+
+    <section class="cable-section reveal d5" aria-label="Faseforskydningsvinkel">
+      <div class="section-head">
+        <h2>Fase·forskydnings<br><span class="accent">vinkel</span></h2>
+        <p class="desc">
+          Beregn fasevinklen φ mellem spænding og strøm i et vekselstrømskredsløb. Indtast to af tre størrelser: modstand R, reaktans X og impedans Z — den tredje beregnes automatisk.
+        </p>
+      </div>
+
+      <div class="cable-grid">
+        <div class="cable-inputs" style="grid-template-columns:repeat(3,1fr)">
+          <div class="cable-cell">
+            <div class="label">
+              <span>A · Modstand</span>
+              <span style="font-family:'STIX Two Text',Cambria,Georgia,serif;font-style:italic;color:var(--amber);font-size:18px">R</span>
+            </div>
+            <div class="unit-name">Ohm (Ω)</div>
+            <div class="input-row">
+              <input type="text" inputmode="decimal" id="phiR" placeholder="—" autocomplete="off"/>
+              <span class="unit">Ω</span>
+            </div>
+          </div>
+
+          <div class="cable-cell">
+            <div class="label">
+              <span>B · Reaktans</span>
+              <span style="font-family:'STIX Two Text',Cambria,Georgia,serif;font-style:italic;color:var(--amber);font-size:18px">X</span>
+            </div>
+            <div class="unit-name">Ohm (Ω)</div>
+            <div class="input-row">
+              <input type="text" inputmode="decimal" id="phiX" placeholder="—" autocomplete="off"/>
+              <span class="unit">Ω</span>
+            </div>
+          </div>
+
+          <div class="cable-cell">
+            <div class="label">
+              <span>C · Impedans</span>
+              <span style="font-family:'STIX Two Text',Cambria,Georgia,serif;font-style:italic;color:var(--amber);font-size:18px">Z</span>
+            </div>
+            <div class="unit-name">Ohm (Ω)</div>
+            <div class="input-row">
+              <input type="text" inputmode="decimal" id="phiZ" placeholder="—" autocomplete="off"/>
+              <span class="unit">Ω</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="cable-output">
+          <div class="out-row" data-out="phiZ_out">
+            <div class="out-label">
+              <span class="k">01 · Impedans <span class="chev">▶</span></span>
+              <span class="n">Z = √(R² + X²)</span>
+            </div>
+            <div class="out-val">
+              <span class="v" id="outPhiZ">—</span>
+              <span class="u">OHM (Ω)</span>
+            </div>
+          </div>
+          <div class="explain" id="explainphiZ_out"></div>
+
+          <div class="out-row" data-out="phiAngle">
+            <div class="out-label">
+              <span class="k">02 · Fasevinkel <span class="chev">▶</span></span>
+              <span class="n">φ = arctan(X / R)</span>
+            </div>
+            <div class="out-val">
+              <span class="v" id="outPhiAngle">—</span>
+              <span class="u">GRADER (°)</span>
+            </div>
+          </div>
+          <div class="explain" id="explainphiAngle"></div>
+
+          <div class="out-row" data-out="phiCos">
+            <div class="out-label">
+              <span class="k">03 · Effektfaktor <span class="chev">▶</span></span>
+              <span class="n">cos φ = R / Z</span>
+            </div>
+            <div class="out-val">
+              <span class="v" id="outPhiCos">—</span>
+              <span class="u">—</span>
+            </div>
+          </div>
+          <div class="explain" id="explainphiCos"></div>
+
+          <div class="out-row" data-out="phiSin">
+            <div class="out-label">
+              <span class="k">04 · sin φ <span class="chev">▶</span></span>
+              <span class="n">sin φ = X / Z</span>
+            </div>
+            <div class="out-val">
+              <span class="v" id="outPhiSin">—</span>
+              <span class="u">—</span>
+            </div>
+          </div>
+          <div class="explain" id="explainphiSin"></div>
+
+          <div class="out-row" data-out="phiTan">
+            <div class="out-label">
+              <span class="k">05 · tan φ <span class="chev">▶</span></span>
+              <span class="n">tan φ = X / R</span>
+            </div>
+            <div class="out-val">
+              <span class="v" id="outPhiTan">—</span>
+              <span class="u">—</span>
+            </div>
+          </div>
+          <div class="explain" id="explainphiTan"></div>
+
+          <div class="verdict" id="phiVerdictEl">
+            <span class="ico"></span>
+            <span id="phiVerdictText">Indtast to af tre: R, X eller Z</span>
+          </div>
+        </div>
+      </div>
+      <div class="note-btn-row">
+        <button class="add-note-btn" id="phiNoteBtn" disabled>+ Tilføj til noter</button>
+      </div>
+    </section>
+
       <span>EL/01 · Ohms lov · 1827</span>
       <span class="sig">Bygget med strøm og lidt modstand.</span>
     </div>
@@ -2174,6 +2294,145 @@
   };
 
   Object.values(tpInputs).forEach(el => el.addEventListener('input', computeThreePhase));
+
+  // ===== PHASE ANGLE CALCULATOR =====
+  const phiInputs = {
+    R: document.getElementById('phiR'),
+    X: document.getElementById('phiX'),
+    Z: document.getElementById('phiZ'),
+  };
+  const outPhiZ      = document.getElementById('outPhiZ');
+  const outPhiAngle  = document.getElementById('outPhiAngle');
+  const outPhiCos    = document.getElementById('outPhiCos');
+  const outPhiSin    = document.getElementById('outPhiSin');
+  const outPhiTan    = document.getElementById('outPhiTan');
+  const phiVerdictEl   = document.getElementById('phiVerdictEl');
+  const phiVerdictText = document.getElementById('phiVerdictText');
+
+  const computePhaseAngle = () => {
+    disableBtn('phiNoteBtn');
+    const frac = (top, bot) => `<span class="frac"><span class="num-top">${top}</span><span class="num-bot">${bot}</span></span>`;
+    const v = (txt) => `<span class="var">${txt}</span>`;
+
+    let R = parse(phiInputs.R.value);
+    let X = parse(phiInputs.X.value);
+    let Z = parse(phiInputs.Z.value);
+
+    const hasR = !isNaN(R) && R >= 0;
+    const hasX = !isNaN(X) && X >= 0;
+    const hasZ = !isNaN(Z) && Z > 0;
+    const count = [hasR, hasX, hasZ].filter(Boolean).length;
+
+    const reset = () => {
+      outPhiZ.textContent = '—'; outPhiAngle.textContent = '—';
+      outPhiCos.textContent = '—'; outPhiSin.textContent = '—'; outPhiTan.textContent = '—';
+      phiVerdictEl.className = 'verdict';
+      phiVerdictText.textContent = 'Indtast to af tre: R, X eller Z';
+      ['phiZ_out','phiAngle','phiCos','phiSin','phiTan'].forEach(k => {
+        document.getElementById('explain'+k).innerHTML = '<p class="note">Indtast to værdier for at se beregningen.</p>';
+      });
+    };
+
+    if (count < 2) { reset(); return; }
+
+    if (!hasR && hasX && hasZ) {
+      if (Z < X) { phiVerdictEl.className='verdict warn'; phiVerdictText.textContent='Fejl · Z kan ikke være mindre end X'; return; }
+      R = Math.sqrt(Z*Z - X*X);
+    } else if (!hasX && hasR && hasZ) {
+      if (Z < R) { phiVerdictEl.className='verdict warn'; phiVerdictText.textContent='Fejl · Z kan ikke være mindre end R'; return; }
+      X = Math.sqrt(Z*Z - R*R);
+    } else if (!hasZ && hasR && hasX) {
+      Z = Math.sqrt(R*R + X*X);
+    }
+
+    if (Z === 0) { phiVerdictEl.className='verdict warn'; phiVerdictText.textContent='Fejl · Z = 0 er ikke muligt'; return; }
+
+    const phi    = Math.atan2(X, R) * 180 / Math.PI;
+    const cosPhi = R / Z;
+    const sinPhi = X / Z;
+    const tanPhi = R > 0 ? X / R : NaN;
+
+    outPhiZ.textContent     = fmt(Z);
+    outPhiAngle.textContent = fmt(phi);
+    outPhiCos.textContent   = fmt(cosPhi);
+    outPhiSin.textContent   = fmt(sinPhi);
+    outPhiTan.textContent   = isFinite(tanPhi) ? fmt(tanPhi) : '∞';
+
+    if (cosPhi >= 0.95) {
+      phiVerdictEl.className = 'verdict';
+      phiVerdictText.textContent = 'God effektfaktor · cos φ ≥ 0,95';
+    } else if (cosPhi >= 0.8) {
+      phiVerdictEl.className = 'verdict amber';
+      phiVerdictText.textContent = 'Acceptabel effektfaktor · sigt efter 0,95+';
+    } else {
+      phiVerdictEl.className = 'verdict warn';
+      phiVerdictText.textContent = 'Lav effektfaktor · overvej kompensering';
+    }
+
+    enableBtn('phiNoteBtn', () => ({
+      ts: Date.now(), kilde: 'Ohms lov', afsnit: 'Faseforskydningsvinkel',
+      input: `R = ${fmt(R)} Ω, X = ${fmt(X)} Ω, Z = ${fmt(Z)} Ω`,
+      linjer: [
+        { beregning: `Z = √(R² + X²) = √(${fmt(R)}² + ${fmt(X)}²) = ${fmt(Z)} Ω`, enhed: '' },
+        { beregning: `φ = arctan(X / R) = arctan(${fmt(X)} / ${fmt(R)}) = ${fmt(phi)}°`, enhed: '' },
+        { beregning: `cos φ = R / Z = ${fmt(R)} / ${fmt(Z)} = ${fmt(cosPhi)}`, enhed: '' },
+        { beregning: `sin φ = X / Z = ${fmt(X)} / ${fmt(Z)} = ${fmt(sinPhi)}`, enhed: '' },
+        ...(isFinite(tanPhi) ? [{ beregning: `tan φ = X / R = ${fmt(X)} / ${fmt(R)} = ${fmt(tanPhi)}`, enhed: '' }] : []),
+      ]
+    }));
+
+    // === Forklaringer ===
+    let zEx = '<h4>Formel</h4>';
+    zEx += `<div class="formula-block">${v('Z')} <span class="eq">=</span> √(${v('R')}² + ${v('X')}²)</div>`;
+    zEx += '<h4>Indsat</h4>';
+    zEx += `<div class="step">${v('R')} (modstand) = <span class="num">${fmt(R)}</span> Ω</div>`;
+    zEx += `<div class="step">${v('X')} (reaktans) = <span class="num">${fmt(X)}</span> Ω</div>`;
+    zEx += `<div class="result-line">${v('Z')} = √(<span class="num">${fmt(R*R)}</span> + <span class="num">${fmt(X*X)}</span>) = <span class="num">${fmt(Z)}</span> Ω</div>`;
+    zEx += '<p class="note">Impedans er den samlede modstand i et vekselstrømskredsløb — den vektorielle sum af resistans og reaktans, udregnet som Pythagoras.</p>';
+    document.getElementById('explainphiZ_out').innerHTML = zEx;
+
+    let phiEx = '<h4>Formel</h4>';
+    phiEx += `<div class="formula-block">φ <span class="eq">=</span> arctan(${frac(v('X'), v('R'))})</div>`;
+    phiEx += '<h4>Indsat</h4>';
+    phiEx += `<div class="step">${v('X')} (reaktans) = <span class="num">${fmt(X)}</span> Ω</div>`;
+    phiEx += `<div class="step">${v('R')} (modstand) = <span class="num">${fmt(R)}</span> Ω</div>`;
+    phiEx += `<div class="result-line">φ = arctan(${frac('<span class="num">'+fmt(X)+'</span>','<span class="num">'+fmt(R)+'</span>')}) = <span class="num">${fmt(phi)}</span>°</div>`;
+    phiEx += '<p class="note">Fasevinklen beskriver forskydningen mellem spænding og strøm. φ = 0° er rent ohmskt (resistivt); φ = 90° er rent reaktivt.</p>';
+    document.getElementById('explainphiAngle').innerHTML = phiEx;
+
+    let cosEx = '<h4>Formel</h4>';
+    cosEx += `<div class="formula-block">cos φ <span class="eq">=</span> ${frac(v('R'), v('Z'))}</div>`;
+    cosEx += '<h4>Indsat</h4>';
+    cosEx += `<div class="step">${v('R')} = <span class="num">${fmt(R)}</span> Ω</div>`;
+    cosEx += `<div class="step">${v('Z')} = <span class="num">${fmt(Z)}</span> Ω</div>`;
+    cosEx += `<div class="result-line">cos φ = ${frac('<span class="num">'+fmt(R)+'</span>','<span class="num">'+fmt(Z)+'</span>')} = <span class="num">${fmt(cosPhi)}</span></div>`;
+    cosEx += '<p class="note">Effektfaktoren angiver hvor stor en del af den tilsyneladende effekt der er nyttig aktiv effekt. Værdier tæt på 1,0 er mest effektive.</p>';
+    document.getElementById('explainphiCos').innerHTML = cosEx;
+
+    let sinEx = '<h4>Formel</h4>';
+    sinEx += `<div class="formula-block">sin φ <span class="eq">=</span> ${frac(v('X'), v('Z'))}</div>`;
+    sinEx += '<h4>Indsat</h4>';
+    sinEx += `<div class="step">${v('X')} = <span class="num">${fmt(X)}</span> Ω</div>`;
+    sinEx += `<div class="step">${v('Z')} = <span class="num">${fmt(Z)}</span> Ω</div>`;
+    sinEx += `<div class="result-line">sin φ = ${frac('<span class="num">'+fmt(X)+'</span>','<span class="num">'+fmt(Z)+'</span>')} = <span class="num">${fmt(sinPhi)}</span></div>`;
+    sinEx += '<p class="note">sin φ svarer til forholdet mellem reaktiv og tilsyneladende effekt (Q/S). Høj sin φ betyder høj reaktiv belastning.</p>';
+    document.getElementById('explainphiSin').innerHTML = sinEx;
+
+    let tanEx = '<h4>Formel</h4>';
+    tanEx += `<div class="formula-block">tan φ <span class="eq">=</span> ${frac(v('X'), v('R'))}</div>`;
+    if (isFinite(tanPhi)) {
+      tanEx += '<h4>Indsat</h4>';
+      tanEx += `<div class="step">${v('X')} = <span class="num">${fmt(X)}</span> Ω</div>`;
+      tanEx += `<div class="step">${v('R')} = <span class="num">${fmt(R)}</span> Ω</div>`;
+      tanEx += `<div class="result-line">tan φ = ${frac('<span class="num">'+fmt(X)+'</span>','<span class="num">'+fmt(R)+'</span>')} = <span class="num">${fmt(tanPhi)}</span></div>`;
+      tanEx += '<p class="note">tan φ = Q/P — forholdet mellem reaktiv og aktiv effekt. Bruges bl.a. til beregning af den nødvendige kompensatorkondensator.</p>';
+    } else {
+      tanEx += '<p class="note">tan φ er udefineret når R = 0 (rent reaktivt kredsløb).</p>';
+    }
+    document.getElementById('explainphiTan').innerHTML = tanEx;
+  };
+
+  Object.values(phiInputs).forEach(el => el.addEventListener('input', computePhaseAngle));
 
   // Click handlers for expanding explanations
   document.querySelectorAll('.out-row[data-out]').forEach(row => {
