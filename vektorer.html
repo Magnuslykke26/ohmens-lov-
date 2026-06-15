@@ -276,6 +276,23 @@
           <span class="ico"></span>
           <span id="v1VerdictText">Indtast x og y for at beregne</span>
         </div>
+        <svg id="v1svg" viewBox="-130 -90 260 180" style="width:100%;margin-top:8px" xmlns="http://www.w3.org/2000/svg">
+          <defs>
+            <marker id="mn1" markerWidth="7" markerHeight="7" refX="5" refY="2.5" orient="auto">
+              <path d="M0,0L0,5L7,2.5z" fill="#9bff5b"/>
+            </marker>
+          </defs>
+          <line x1="-118" y1="0" x2="121" y2="0" stroke="#1d2a1f" stroke-width="1"/>
+          <line x1="0" y1="77" x2="0" y2="-78" stroke="#1d2a1f" stroke-width="1"/>
+          <text x="122" y="4" font-size="10" fill="#4a7a32" font-family="STIX Two Text,serif" font-style="italic">x</text>
+          <text x="-5" y="-80" font-size="10" fill="#4a7a32" font-family="STIX Two Text,serif" font-style="italic">y</text>
+          <line id="v1svgXp" x1="0" y1="0" x2="0" y2="0" stroke="#9bff5b" stroke-width="1" stroke-dasharray="3 2" opacity="0.35"/>
+          <line id="v1svgYp" x1="0" y1="0" x2="0" y2="0" stroke="#9bff5b" stroke-width="1" stroke-dasharray="3 2" opacity="0.35"/>
+          <line id="v1svgVec" x1="0" y1="0" x2="0" y2="0" stroke="#9bff5b" stroke-width="2.5" marker-end="url(#mn1)"/>
+          <text id="v1svgLv" x="-999" y="-999" font-size="13" fill="#9bff5b" font-family="STIX Two Text,serif" font-style="italic">v</text>
+          <text id="v1svgLx" x="-999" y="-999" font-size="10" fill="#8aa088" font-family="STIX Two Text,serif" font-style="italic">x</text>
+          <text id="v1svgLy" x="-999" y="-999" font-size="10" fill="#8aa088" font-family="STIX Two Text,serif" font-style="italic">y</text>
+        </svg>
       </div>
     </div>
     <div class="note-btn-row">
@@ -358,6 +375,19 @@
         </div>
       </div>
     </div>
+    <svg id="addSvg" viewBox="0 0 360 200" style="width:100%;margin-top:16px;border:1px solid #1d2a1f;background:#0f1612;display:none" xmlns="http://www.w3.org/2000/svg">
+      <defs>
+        <marker id="mnA" markerWidth="7" markerHeight="7" refX="5" refY="2.5" orient="auto"><path d="M0,0L0,5L7,2.5z" fill="#9bff5b"/></marker>
+        <marker id="mnB" markerWidth="7" markerHeight="7" refX="5" refY="2.5" orient="auto"><path d="M0,0L0,5L7,2.5z" fill="#ffb347"/></marker>
+        <marker id="mnR" markerWidth="7" markerHeight="7" refX="5" refY="2.5" orient="auto"><path d="M0,0L0,5L7,2.5z" fill="#ff5c4d"/></marker>
+      </defs>
+      <line id="addSvgA" x1="180" y1="100" x2="180" y2="100" stroke="#9bff5b" stroke-width="2.5" marker-end="url(#mnA)"/>
+      <line id="addSvgB" x1="180" y1="100" x2="180" y2="100" stroke="#ffb347" stroke-width="2.5" marker-end="url(#mnB)"/>
+      <line id="addSvgR" x1="180" y1="100" x2="180" y2="100" stroke="#ff5c4d" stroke-width="2" stroke-dasharray="5 3" marker-end="url(#mnR)"/>
+      <text id="addSvgLa" x="-999" y="-999" font-size="13" fill="#9bff5b" font-family="STIX Two Text,serif" font-style="italic">A</text>
+      <text id="addSvgLb" x="-999" y="-999" font-size="13" fill="#ffb347" font-family="STIX Two Text,serif" font-style="italic">B</text>
+      <text id="addSvgLr" x="-999" y="-999" font-size="13" fill="#ff5c4d" font-family="STIX Two Text,serif" font-style="italic">R</text>
+    </svg>
     <div class="note-btn-row">
       <button class="add-note-btn" id="addNoteBtn" disabled>+ Tilføj til noter</button>
     </div>
@@ -600,6 +630,51 @@
   }
 
 
+  // ─── SVG helpers ───
+  const sa = (id, attrs) => {
+    const el = document.getElementById(id);
+    if (el) Object.entries(attrs).forEach(([k, v]) => el.setAttribute(k, String(v)));
+  };
+  function drawV1(x, y) {
+    if (!isFinite(x) || !isFinite(y) || (x === 0 && y === 0)) {
+      ['v1svgVec','v1svgXp','v1svgYp'].forEach(id => sa(id, {x1:0,y1:0,x2:0,y2:0}));
+      ['v1svgLv','v1svgLx','v1svgLy'].forEach(id => sa(id, {x:-999,y:-999}));
+      return;
+    }
+    const maxV = Math.max(Math.abs(x), Math.abs(y));
+    const sc = 75 / maxV;
+    const tx = x * sc, ty = -y * sc;
+    sa('v1svgVec', {x1:0, y1:0, x2:tx, y2:ty});
+    sa('v1svgXp',  {x1:0, y1:0, x2:tx, y2:0});
+    sa('v1svgYp',  {x1:tx, y1:0, x2:tx, y2:ty});
+    sa('v1svgLv',  {x:tx+8, y:ty-4});
+    sa('v1svgLx',  {x:tx/2-3, y:14});
+    sa('v1svgLy',  {x:tx+6, y:ty/2+4});
+  }
+  function drawAdd(ax, ay, bx, by) {
+    const svg = document.getElementById('addSvg');
+    if (!svg) return;
+    if (!isFinite(ax)||!isFinite(ay)||!isFinite(bx)||!isFinite(by)) { svg.style.display='none'; return; }
+    const rx=ax+bx, ry=ay+by;
+    const xs=[0,ax,rx], ys=[0,ay,ry];
+    const xmin=Math.min(...xs), xmax=Math.max(...xs), ymin=Math.min(...ys), ymax=Math.max(...ys);
+    const xr=xmax-xmin, yr=ymax-ymin;
+    if (xr<0.001 && yr<0.001) { svg.style.display='none'; return; }
+    svg.style.display='block';
+    const PAD=35, vW=360, vH=200, usW=vW-2*PAD, usH=vH-2*PAD;
+    const sc = Math.min(xr>0.001?usW/xr:Infinity, yr>0.001?usH/yr:Infinity) * 0.78;
+    const cx = PAD+usW/2-(xmin+xmax)/2*sc;
+    const cy = PAD+usH/2+(ymin+ymax)/2*sc;
+    const sx = v => cx+v*sc, sy = v => cy-v*sc;
+    const O={x:sx(0),y:sy(0)}, A={x:sx(ax),y:sy(ay)}, R={x:sx(rx),y:sy(ry)};
+    sa('addSvgA', {x1:O.x,y1:O.y,x2:A.x,y2:A.y});
+    sa('addSvgB', {x1:A.x,y1:A.y,x2:R.x,y2:R.y});
+    sa('addSvgR', {x1:O.x,y1:O.y,x2:R.x,y2:R.y});
+    sa('addSvgLa', {x:(O.x+A.x)/2+8, y:(O.y+A.y)/2-8});
+    sa('addSvgLb', {x:(A.x+R.x)/2+8, y:(A.y+R.y)/2-8});
+    sa('addSvgLr', {x:(O.x+R.x)/2-16, y:(O.y+R.y)/2+8});
+  }
+
   // ===== 1. 2D VEKTOR GRUNDLÆGGENDE =====
   ['v1x','v1y'].forEach(id => document.getElementById(id).addEventListener('input', computeV1));
   function computeV1() {
@@ -608,12 +683,13 @@
     if (isNaN(x) || isNaN(y)) {
       sv('v1Verdict','Indtast x og y for at beregne');
       setV('v1mag',NaN); setV('v1ang',NaN); setV('v1ux',NaN); setV('v1uy',NaN);
-      disableBtn('v1NoteBtn'); return;
+      disableBtn('v1NoteBtn'); drawV1(NaN, NaN); return;
     }
     const mag = Math.sqrt(x*x + y*y);
     const ang = r2d(Math.atan2(y, x));
     setV('v1mag', mag); setV('v1ang', ang); setV('v1ux', x/mag); setV('v1uy', y/mag);
     sv('v1Verdict', 'Beregnet · OK');
+    drawV1(x, y);
     enableBtn('v1NoteBtn', () => ({
       ts: Date.now(), kilde: 'Vektorer', afsnit: '2D Vektor grundlæggende',
       input: `v = (${fmt(x)}, ${fmt(y)})`,
@@ -637,13 +713,14 @@
     if ([ax,ay,bx,by].some(isNaN)) {
       sv('addVerdict','Indtast begge vektorer');
       setV('addRx',NaN); setV('addRy',NaN); setV('addRmag',NaN); setV('addRang',NaN);
-      disableBtn('addNoteBtn'); return;
+      disableBtn('addNoteBtn'); drawAdd(NaN,NaN,NaN,NaN); return;
     }
     const rx = ax+bx, ry = ay+by;
     const mag = Math.sqrt(rx*rx + ry*ry);
     const ang = r2d(Math.atan2(ry, rx));
     setV('addRx', rx); setV('addRy', ry); setV('addRmag', mag); setV('addRang', ang);
     sv('addVerdict', 'Beregnet · OK');
+    drawAdd(ax, ay, bx, by);
     enableBtn('addNoteBtn', () => ({
       ts: Date.now(), kilde: 'Vektorer', afsnit: 'Vektor addition',
       input: `A = (${fmt(ax)}, ${fmt(ay)}), B = (${fmt(bx)}, ${fmt(by)})`,
