@@ -878,6 +878,124 @@
   }
   .cable-cell .awg-info:empty{opacity:0}
 
+  /* ===== ANTAL MODSTANDE ===== */
+  .antal-section{
+    background:var(--bg-2);
+    padding:28px 32px;
+  }
+  .antal-head{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:16px;
+    margin-bottom:22px;
+  }
+  .antal-head-left{
+    display:flex;
+    flex-direction:column;
+    gap:4px;
+  }
+  .antal-head-title{
+    font-size:10px;
+    letter-spacing:.25em;
+    text-transform:uppercase;
+    color:var(--ink-dim);
+  }
+  .antal-head-sub{
+    font-family:'STIX Two Text',Cambria,Georgia,serif;
+    font-style:italic;
+    font-size:13px;
+    color:var(--ink);
+  }
+  .antal-tabs{
+    display:flex;
+    gap:4px;
+    flex-shrink:0;
+  }
+  .antal-tab{
+    background:transparent;
+    border:1px solid var(--line-2);
+    color:var(--ink-dim);
+    font-size:9px;
+    letter-spacing:.2em;
+    text-transform:uppercase;
+    padding:5px 14px;
+    cursor:pointer;
+    transition:border-color .15s,color .15s;
+  }
+  .antal-tab.active{border-color:var(--neon);color:var(--neon)}
+  .antal-body{
+    display:grid;
+    grid-template-columns:150px 1fr;
+    gap:24px 36px;
+    align-items:start;
+  }
+  .antal-input-label{
+    font-size:9px;
+    letter-spacing:.2em;
+    text-transform:uppercase;
+    color:var(--ink-dim);
+    margin-bottom:10px;
+  }
+  .antal-input-row{
+    display:flex;
+    align-items:baseline;
+    gap:10px;
+    border-bottom:1px solid var(--line-2);
+    padding-bottom:8px;
+  }
+  .antal-input-row input{
+    background:transparent;
+    border:none;
+    outline:none;
+    font-family:'STIX Two Text',Cambria,Georgia,serif;
+    font-size:36px;
+    color:var(--ink);
+    width:68px;
+  }
+  .antal-input-row input::placeholder{color:var(--ink-dim);opacity:.4}
+  .antal-input-row input:focus{color:var(--neon)}
+  .antal-stk{
+    font-size:10px;
+    letter-spacing:.2em;
+    text-transform:uppercase;
+    color:var(--ink-dim);
+  }
+  .antal-results{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:16px;
+  }
+  .antal-result-item .rl{
+    font-size:9px;
+    letter-spacing:.2em;
+    text-transform:uppercase;
+    color:var(--ink-dim);
+    margin-bottom:4px;
+  }
+  .antal-result-item .rv{
+    font-family:'STIX Two Text',Cambria,Georgia,serif;
+    font-size:22px;
+    color:var(--ink);
+  }
+  .antal-result-item .rv .u{
+    font-size:10px;
+    letter-spacing:.1em;
+    color:var(--ink-dim);
+    margin-left:3px;
+  }
+  .antal-hint{
+    font-size:12px;
+    color:var(--ink-dim);
+    font-style:italic;
+    grid-column:1/-1;
+    align-self:center;
+    margin:0;
+  }
+  @media(max-width:600px){
+    .antal-body{grid-template-columns:1fr}
+  }
+
   @media (max-width: 820px){
     .cable-grid{grid-template-columns:1fr}
     .cable-inputs{grid-template-columns:1fr 1fr}
@@ -1049,6 +1167,31 @@
         </div>
         <div class="note-btn-row" style="justify-content:flex-start">
           <button class="add-note-btn" id="ohmNoteBtn" disabled>+ Tilføj til noter</button>
+        </div>
+      </div>
+    </section>
+
+    <section class="antal-section reveal d5" aria-label="Antal modstande">
+      <div class="antal-head">
+        <div class="antal-head-left">
+          <span class="antal-head-title">Antal · identiske modstande</span>
+          <span class="antal-head-sub">Lyskilder, modstande, komponenter</span>
+        </div>
+        <div class="antal-tabs">
+          <button class="antal-tab active" data-kobling="parallel">Parallel</button>
+          <button class="antal-tab" data-kobling="serie">Serie</button>
+        </div>
+      </div>
+      <div class="antal-body">
+        <div>
+          <div class="antal-input-label">Antal stk.</div>
+          <div class="antal-input-row">
+            <input type="text" inputmode="numeric" id="antalN" placeholder="2" autocomplete="off"/>
+            <span class="antal-stk">stk</span>
+          </div>
+        </div>
+        <div class="antal-results" id="antalResults">
+          <p class="antal-hint">Beregn Ohms Lov ovenfor og sæt antal for at se samlet resultat.</p>
         </div>
       </div>
     </section>
@@ -1937,6 +2080,65 @@
     userEntered.add('R');
     compute();
   });
+
+  // ===== ANTAL MODSTANDE =====
+  let antalKobling = 'parallel';
+  const antalNInput = document.getElementById('antalN');
+  const antalResultsEl = document.getElementById('antalResults');
+
+  const computeAntal = () => {
+    const rawN = parse(antalNInput.value);
+    const N = isNaN(rawN) ? NaN : Math.round(rawN);
+    const V = parse(inputs.V.value);
+    const I = parse(inputs.I.value);
+    const R = parse(inputs.R.value);
+    const P = parse(inputs.P.value);
+
+    if (isNaN(N) || N < 1 || isNaN(V) || isNaN(I) || isNaN(R) || isNaN(P)) {
+      antalResultsEl.innerHTML = '<p class="antal-hint">Beregn Ohms Lov ovenfor og sæt antal for at se samlet resultat.</p>';
+      return;
+    }
+
+    let rows;
+    if (antalKobling === 'parallel') {
+      rows = [
+        { label: 'Samlet strøm',       val: fmt(N * I),   unit: 'A' },
+        { label: 'Samlet modstand',     val: fmt(R / N),   unit: 'Ω' },
+        { label: 'Samlet effekt',       val: fmt(N * P),   unit: 'W' },
+        { label: 'Spænding pr. enhed',  val: fmt(V),       unit: 'V' },
+      ];
+    } else {
+      rows = [
+        { label: 'Samlet spænding',     val: fmt(N * V),   unit: 'V' },
+        { label: 'Samlet modstand',     val: fmt(N * R),   unit: 'Ω' },
+        { label: 'Samlet effekt',       val: fmt(N * P),   unit: 'W' },
+        { label: 'Strøm pr. enhed',     val: fmt(I),       unit: 'A' },
+      ];
+    }
+
+    antalResultsEl.innerHTML = rows.map(r =>
+      `<div class="antal-result-item">
+        <div class="rl">${r.label}</div>
+        <div class="rv">${r.val}<span class="u">${r.unit}</span></div>
+      </div>`
+    ).join('');
+  };
+
+  document.querySelectorAll('.antal-tab').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('.antal-tab').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      antalKobling = btn.dataset.kobling;
+      computeAntal();
+    });
+  });
+
+  antalNInput.addEventListener('input', computeAntal);
+
+  // Opdater antal-beregning når main-felter ændres (efter compute() via eget listener)
+  fields.forEach(f => inputs[f].addEventListener('input', computeAntal));
+  document.getElementById('clear').addEventListener('click', computeAntal);
+  document.getElementById('example').addEventListener('click', computeAntal);
 
   // ===== CABLE CALCULATOR =====
   const cableInputs = {
